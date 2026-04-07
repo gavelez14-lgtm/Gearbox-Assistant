@@ -5,255 +5,315 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Rotork Manual Gearbox Configurator</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
-  :root {
-    --bg:#0e1117; --surface:#161b25; --surface2:#1e2535; --border:#2a3347;
-    --accent:#f97316; --accent2:#3b82f6; --green:#22c55e; --red:#ef4444;
-    --yellow:#eab308; --text:#e2e8f0; --muted:#64748b; --dim:#94a3b8;
-    --teal:#06b6d4; --hh:64px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;}
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
+:root {
+  --bg:#0e1117; --surface:#161b25; --surface2:#1e2535; --border:#2a3347;
+  --accent:#f97316; --accent2:#3b82f6; --green:#22c55e; --red:#ef4444;
+  --yellow:#eab308; --text:#e2e8f0; --muted:#64748b; --dim:#94a3b8;
+  --teal:#06b6d4; --hh:64px;
+  /* result colours */
+  --ok-bg:rgba(34,197,94,.08);   --ok-border:rgba(34,197,94,.3);
+  --warn-bg:rgba(234,179,8,.07); --warn-border:rgba(234,179,8,.3);
+  --bad-bg:rgba(239,68,68,.08);  --bad-border:rgba(239,68,68,.3);
+  --info-bg:rgba(59,130,246,.07);--info-border:rgba(59,130,246,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;}
 
-  header{background:var(--surface);border-bottom:1px solid var(--border);height:var(--hh);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;}
-  .logo{background:var(--accent);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.08em;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
-  header h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase;}
-  header .sub{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:auto;}
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);height:var(--hh);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;}
+.logo{background:var(--accent);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.08em;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+header h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase;}
+header .sub{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:auto;}
 
-  .layout{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - var(--hh));}
+/* ── PAGE TABS ── */
+.tabs{display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;}
+.tab{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 20px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;user-select:none;}
+.tab:hover{color:var(--text);}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
 
-  /* ── LEFT PANEL ── */
-  .left{background:var(--surface);border-right:1px solid var(--border);padding:24px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
-  .slabel{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
-  .fg{display:flex;flex-direction:column;gap:14px;}
-  .f{display:flex;flex-direction:column;gap:5px;}
-  .f label{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);}
-  .f select,.f input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:8px 12px;outline:none;transition:border-color .15s;width:100%;}
-  .f select:focus,.f input:focus{border-color:var(--accent2);}
-  .f select option{background:var(--surface2);}
-  .trow{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;}
-  .nm{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);}
+/* ── PAGE PANELS ── */
+.page{display:none;} .page.on{display:block;}
 
-  /* Valve chips */
-  .valve-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-  .vchip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:3px;}
-  .vchip:hover{border-color:var(--accent);background:rgba(249,115,22,.06);}
-  .vchip.on{background:rgba(249,115,22,.12);border-color:var(--accent);}
-  .vchip .vname{font-size:13px;font-weight:600;color:var(--text);}
-  .vchip.on .vname{color:var(--accent);}
-  .vchip .vturn{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-  .vchip.on .vturn{color:rgba(249,115,22,.7);}
-  /* "Any" chip spans full width */
-  .vchip.any{grid-column:1/-1;}
+/* ── CONFIGURATOR LAYOUT ── */
+.layout{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - var(--hh) - 41px);}
+.left{background:var(--surface);border-right:1px solid var(--border);padding:24px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+.right{padding:24px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
 
-  /* Turn indicator pill */
-  .turn-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 12px;font-size:12px;}
-  .turn-pill .pill-icon{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;}
-  .turn-pill.part .pill-icon{background:var(--accent2);}
-  .turn-pill.multi .pill-icon{background:var(--green);}
-  .turn-pill .pill-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);}
-  .turn-pill.part .pill-label{color:var(--accent2);}
-  .turn-pill.multi .pill-label{color:var(--green);}
+/* ── COMPAT LAYOUT ── */
+.compat-layout{padding:24px;display:flex;flex-direction:column;gap:20px;max-width:960px;margin:0 auto;width:100%;}
 
-  /* Special chips */
-  .chips{display:flex;flex-wrap:wrap;gap:6px;}
-  .chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--dim);font-weight:500;}
-  .chip:hover{border-color:var(--accent);color:var(--accent);}
-  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .chip.sp:hover{border-color:var(--teal);color:var(--teal);}
-  .chip.sp.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+/* ── SHARED FORM PARTS ── */
+.slabel{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.fg{display:flex;flex-direction:column;gap:14px;}
+.f{display:flex;flex-direction:column;gap:5px;}
+.f label{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);}
+.f select,.f input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:8px 12px;outline:none;transition:border-color .15s;width:100%;}
+.f select:focus,.f input:focus{border-color:var(--accent2);}
+.f select option{background:var(--surface2);}
+.f .err{font-size:11px;color:var(--red);margin-top:2px;display:none;}
+.f.has-err input,.f.has-err select{border-color:var(--red);}
+.f.has-err .err{display:block;}
 
-  .btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:11px 20px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;width:100%;transition:background .15s,transform .1s;}
-  .btn:hover{background:#ea6500;} .btn:active{transform:scale(.98);}
-  hr{border:none;border-top:1px solid var(--border);}
+.trow{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;}
+.trow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end;}
+.trow4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end;}
+.nm{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);}
 
-  /* Handwheel */
-  .hwbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:12px;color:var(--dim);line-height:1.8;}
-  .hwbox .ctx{font-family:'DM Mono',monospace;font-size:11px;color:var(--teal);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-  .hwbox .v{color:var(--green);font-family:'DM Mono',monospace;font-size:13px;}
-  .hwbox .warn{color:var(--yellow);font-size:11px;font-style:italic;}
-  .hwt{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
-  .hwt th{text-align:left;color:var(--muted);padding:3px 6px;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;}
-  .hwt td{padding:4px 6px;font-family:'DM Mono',monospace;border-bottom:1px solid var(--border);}
+/* ── VALVE CHIPS ── */
+.valve-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.vchip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:3px;}
+.vchip:hover{border-color:var(--accent);background:rgba(249,115,22,.06);}
+.vchip.on{background:rgba(249,115,22,.12);border-color:var(--accent);}
+.vchip .vname{font-size:13px;font-weight:600;color:var(--text);}
+.vchip.on .vname{color:var(--accent);}
+.vchip .vturn{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.vchip.on .vturn{color:rgba(249,115,22,.7);}
+.vchip.any{grid-column:1/-1;}
+.turn-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 12px;font-size:12px;}
+.turn-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.turn-pill.part .dot{background:var(--accent2);}  .turn-pill.part .lbl{color:var(--accent2);}
+.turn-pill.multi .dot{background:var(--green);}   .turn-pill.multi .lbl{color:var(--green);}
+.turn-pill .lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);}
 
-  /* TC */
-  .tcline{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--dim);line-height:1.6;}
-  .tcline .v{color:var(--green);font-size:13px;}
-  .tcgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .tci{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);line-height:1.7;}
-  .tci .v{color:var(--accent2);font-size:13px;}
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--dim);font-weight:500;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.chip.sp:hover{border-color:var(--teal);color:var(--teal);}
+.chip.sp.on{background:var(--teal);border-color:var(--teal);color:#fff;}
 
-  /* ── RIGHT PANEL ── */
-  .right{padding:24px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
-  .rh{display:flex;align-items:center;justify-content:space-between;}
-  .rt{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
-  .rc{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
+/* ── BUTTONS ── */
+.btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:11px 20px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;width:100%;transition:background .15s,transform .1s;}
+.btn:hover{background:#ea6500;} .btn:active{transform:scale(.98);}
+.btn2{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:9px 18px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.btn2:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-copy{background:rgba(59,130,246,.15);color:var(--accent2);border:1px solid rgba(59,130,246,.4);border-radius:5px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .15s;}
+.btn-copy:hover{background:rgba(59,130,246,.25);}
+.btn-copy.copied{background:rgba(34,197,94,.15);color:var(--green);border-color:rgba(34,197,94,.4);}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;}
+hr{border:none;border-top:1px solid var(--border);}
 
-  /* Card */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s,transform .1s;cursor:pointer;}
-  .card:hover{border-color:var(--accent2);transform:translateY(-1px);}
-  .card.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
-  .ch{background:var(--surface2);padding:12px 16px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border);gap:8px;}
-  .cs{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.02em;}
-  .ct{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:1px;}
-  .cba{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
-  .badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em;border:1px solid transparent;white-space:nowrap;}
-  .badge.bst{background:rgba(249,115,22,.2);color:var(--accent);border-color:rgba(249,115,22,.4);}
-  .badge.mat{background:rgba(59,130,246,.15);color:var(--accent2);border-color:rgba(59,130,246,.3);}
-  .badge.spc{background:rgba(6,182,212,.12);color:var(--teal);border-color:rgba(6,182,212,.3);}
-  .badge.hw{background:rgba(148,163,184,.08);color:var(--dim);border-color:var(--border);}
+/* ── HW ── */
+.hwbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:12px;color:var(--dim);line-height:1.8;}
+.hwbox .ctx{font-family:'DM Mono',monospace;font-size:11px;color:var(--teal);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.hwbox .v{color:var(--green);font-family:'DM Mono',monospace;font-size:13px;}
+.hwbox .warn{color:var(--yellow);font-size:11px;font-style:italic;}
+.hwt{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
+.hwt th{text-align:left;color:var(--muted);padding:3px 6px;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;}
+.hwt td{padding:4px 6px;font-family:'DM Mono',monospace;border-bottom:1px solid var(--border);}
 
-  .cb{padding:14px 16px;display:flex;flex-direction:column;gap:8px;}
-  .crow{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;gap:8px;}
-  .cl{color:var(--muted);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
-  .cv{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);text-align:right;}
-  .cv.hi{color:var(--accent);font-size:13px;}
-  .bar{margin-top:2px;}
-  .barl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:4px;}
-  .bart{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-  .barf{height:100%;border-radius:2px;transition:width .4s ease;}
-  .spn{background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.22);border-radius:4px;padding:6px 10px;font-size:11px;color:var(--teal);line-height:1.5;}
-  .cn{font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;font-style:italic;line-height:1.5;}
+/* ── TC ── */
+.tcline{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--dim);line-height:1.6;}
+.tcline .v{color:var(--green);font-size:13px;}
+.tcgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tci{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);line-height:1.7;}
+.tci .v{color:var(--accent2);font-size:13px;}
 
-  /* Detail */
-  .det{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;display:none;}
-  .det.open{display:block;}
-  .det h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .xbtn{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
-  .xbtn:hover{border-color:var(--red);color:var(--red);}
-  .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
-  .dc{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 12px;}
-  .dcl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500;margin-bottom:4px;}
-  .dcv{font-family:'DM Mono',monospace;font-size:13px;color:var(--text);}
-  .dcv.ac{color:var(--accent);} .dcv.sp{color:var(--teal);}
-  .btitle{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);margin-bottom:8px;margin-top:16px;}
-  .dt{width:100%;border-collapse:collapse;font-size:12px;}
-  .dt th{background:var(--surface2);padding:6px 10px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);}
-  .dt td{padding:6px 10px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;color:var(--dim);}
-  .dt tr:hover td{background:var(--surface2);}
-  .dt tr.sel td{background:rgba(249,115,22,.08);color:var(--text);}
-  .dt tr.sel td:first-child{color:var(--accent);font-weight:500;}
-  .dt .ok td{color:var(--green);} .dt .no td{color:var(--red);opacity:.6;}
+/* ── RESULT CARDS ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s,transform .1s;cursor:pointer;}
+.card:hover{border-color:var(--accent2);transform:translateY(-1px);}
+.card.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.ch{background:var(--surface2);padding:12px 16px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border);gap:8px;}
+.cs{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.02em;}
+.ct{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:1px;}
+.cba{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em;border:1px solid transparent;white-space:nowrap;}
+.badge.bst{background:rgba(249,115,22,.2);color:var(--accent);border-color:rgba(249,115,22,.4);}
+.badge.mat{background:rgba(59,130,246,.15);color:var(--accent2);border-color:rgba(59,130,246,.3);}
+.badge.spc{background:rgba(6,182,212,.12);color:var(--teal);border-color:rgba(6,182,212,.3);}
+.badge.hw{background:rgba(148,163,184,.08);color:var(--dim);border-color:var(--border);}
+.cb{padding:14px 16px;display:flex;flex-direction:column;gap:8px;}
+.crow{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;gap:8px;}
+.cl{color:var(--muted);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.cv{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);text-align:right;}
+.cv.hi{color:var(--accent);font-size:13px;}
+.bar{margin-top:2px;}
+.barl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:4px;}
+.bart{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.barf{height:100%;border-radius:2px;transition:width .4s ease;}
+.spn{background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.22);border-radius:4px;padding:6px 10px;font-size:11px;color:var(--teal);line-height:1.5;}
+.cn{font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;font-style:italic;line-height:1.5;}
 
-  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:80px 40px;text-align:center;}
-  .empty .ico{font-size:48px;opacity:.3;}
-  .empty h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);}
-  .empty p{font-size:13px;color:var(--muted);max-width:320px;line-height:1.6;}
+/* ── DETAIL ── */
+.det{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;display:none;}
+.det.open{display:block;}
+.det h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.xbtn{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.xbtn:hover{border-color:var(--red);color:var(--red);}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+.dc{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 12px;}
+.dcl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500;margin-bottom:4px;}
+.dcv{font-family:'DM Mono',monospace;font-size:13px;color:var(--text);}
+.dcv.ac{color:var(--accent);} .dcv.sp{color:var(--teal);}
+.btitle{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);margin-bottom:8px;margin-top:16px;}
+.dt{width:100%;border-collapse:collapse;font-size:12px;}
+.dt th{background:var(--surface2);padding:6px 10px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);}
+.dt td{padding:6px 10px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;color:var(--dim);}
+.dt tr:hover td{background:var(--surface2);}
+.dt tr.sel td{background:rgba(249,115,22,.08);color:var(--text);}
+.dt tr.sel td:first-child{color:var(--accent);font-weight:500;}
+.dt .ok td{color:var(--green);} .dt .no td{color:var(--red);opacity:.6;}
 
-  @media(max-width:900px){.layout{grid-template-columns:1fr;}.left{border-right:none;border-bottom:1px solid var(--border);}}
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:80px 40px;text-align:center;}
+.empty .ico{font-size:48px;opacity:.3;}
+.empty h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);}
+.empty p{font-size:13px;color:var(--muted);max-width:320px;line-height:1.6;}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPATIBILITY PAGE STYLES
+═══════════════════════════════════════════════════════════ */
+
+/* Section card wrapper */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.sec-title .num{background:var(--accent);color:#fff;font-size:11px;font-family:'DM Mono',monospace;width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* Conditional form sections */
+.cond{display:none;} .cond.show{display:block;}
+
+/* Unit toggle inline */
+.unit-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:5px;overflow:hidden;}
+.unit-toggle button{background:var(--surface2);border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;padding:5px 10px;cursor:pointer;transition:all .15s;border-right:1px solid var(--border);}
+.unit-toggle button:last-child{border-right:none;}
+.unit-toggle button.on{background:var(--accent);color:#fff;}
+
+/* Result panel */
+.result-panel{border-radius:8px;padding:20px 24px;border:1px solid;}
+.result-panel.ok{background:var(--ok-bg);border-color:var(--ok-border);}
+.result-panel.warn{background:var(--warn-bg);border-color:var(--warn-border);}
+.result-panel.bad{background:var(--bad-bg);border-color:var(--bad-border);}
+.result-panel.info{background:var(--info-bg);border-color:var(--info-border);}
+.result-panel.empty-result{background:var(--surface);border-color:var(--border);}
+
+.result-verdict{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.verdict-icon{font-size:28px;flex-shrink:0;}
+.verdict-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;}
+.verdict-title.ok{color:var(--green);}
+.verdict-title.warn{color:var(--yellow);}
+.verdict-title.bad{color:var(--red);}
+.verdict-title.info{color:var(--accent2);}
+
+.result-items{display:flex;flex-direction:column;gap:8px;}
+.ri{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.5;}
+.ri .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.ri.ok-item .dot{background:var(--green);}
+.ri.warn-item .dot{background:var(--yellow);}
+.ri.bad-item .dot{background:var(--red);}
+.ri.info-item .dot{background:var(--accent2);}
+.ri .ri-text{color:var(--text);}
+.ri .ri-sub{color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;margin-top:2px;}
+
+/* Machining note block */
+.machine-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-top:14px;}
+.machine-block-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;}
+.machine-note{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);line-height:1.9;white-space:pre-wrap;}
+.machine-actions{display:flex;gap:10px;margin-top:10px;align-items:center;}
+
+/* Missing field list */
+.missing-list{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
+.missing-item{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:4px;padding:3px 10px;}
+
+/* Stem diagram hint */
+.stem-hint{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:11px;color:var(--muted);font-style:italic;line-height:1.6;margin-top:6px;}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;}
+  .left{border-right:none;border-bottom:1px solid var(--border);}
+  .trow3,.trow4{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
+
 <header>
   <span class="logo">Rotork</span>
   <h1>Manual Gearbox Configurator</h1>
-  <span class="sub">v1.4 &middot; GB Series</span>
+  <span class="sub">v1.5 &middot; GB Series</span>
 </header>
 
+<!-- ── PAGE TABS ── -->
+<nav class="tabs">
+  <div class="tab on" onclick="showPage('cfg',this)">Gearbox Selector</div>
+  <div class="tab" onclick="showPage('compat',this)">Interface &amp; Machining</div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════
+     PAGE 1 — GEARBOX SELECTOR
+════════════════════════════════════════════════════════ -->
+<div class="page on" id="page-cfg">
 <div class="layout">
+
 <aside class="left">
   <div>
     <div class="slabel">Application Parameters</div>
     <div class="fg">
 
-      <!-- VALVE TYPE — drives turn type automatically -->
+      <!-- Valve type chips — each carries data-turn so we can infer quarter/multi automatically -->
       <div class="f">
         <label>Valve / Application Type</label>
         <div class="valve-grid" id="vchips">
-          <div class="vchip any on" data-val="any" data-turn="any" onclick="pickValve(this)">
-            <span class="vname">Any</span>
-            <span class="vturn">All types</span>
-          </div>
-          <div class="vchip" data-val="Butterfly" data-turn="Part-turn" onclick="pickValve(this)">
-            <span class="vname">Butterfly</span>
-            <span class="vturn">Quarter-turn</span>
-          </div>
-          <div class="vchip" data-val="Ball" data-turn="Part-turn" onclick="pickValve(this)">
-            <span class="vname">Ball</span>
-            <span class="vturn">Quarter-turn</span>
-          </div>
-          <div class="vchip" data-val="Plug" data-turn="Part-turn" onclick="pickValve(this)">
-            <span class="vname">Plug</span>
-            <span class="vturn">Quarter-turn</span>
-          </div>
-          <div class="vchip" data-val="Damper" data-turn="Part-turn" onclick="pickValve(this)">
-            <span class="vname">Damper</span>
-            <span class="vturn">Quarter-turn</span>
-          </div>
-          <div class="vchip" data-val="Gate" data-turn="Multi-turn" onclick="pickValve(this)">
-            <span class="vname">Gate</span>
-            <span class="vturn">Multi-turn</span>
-          </div>
-          <div class="vchip" data-val="Globe" data-turn="Multi-turn" onclick="pickValve(this)">
-            <span class="vname">Globe</span>
-            <span class="vturn">Multi-turn</span>
-          </div>
-          <div class="vchip" data-val="Sluice Gate" data-turn="Multi-turn" onclick="pickValve(this)">
-            <span class="vname">Sluice Gate</span>
-            <span class="vturn">Multi-turn</span>
-          </div>
+          <div class="vchip any on" data-val="any"        data-turn="any"        onclick="pickValve(this)"><span class="vname">Any</span><span class="vturn">All types</span></div>
+          <div class="vchip"        data-val="Butterfly"  data-turn="Part-turn"  onclick="pickValve(this)"><span class="vname">Butterfly</span><span class="vturn">Quarter-turn</span></div>
+          <div class="vchip"        data-val="Ball"       data-turn="Part-turn"  onclick="pickValve(this)"><span class="vname">Ball</span><span class="vturn">Quarter-turn</span></div>
+          <div class="vchip"        data-val="Plug"       data-turn="Part-turn"  onclick="pickValve(this)"><span class="vname">Plug</span><span class="vturn">Quarter-turn</span></div>
+          <div class="vchip"        data-val="Damper"     data-turn="Part-turn"  onclick="pickValve(this)"><span class="vname">Damper</span><span class="vturn">Quarter-turn</span></div>
+          <div class="vchip"        data-val="Gate"       data-turn="Multi-turn" onclick="pickValve(this)"><span class="vname">Gate</span><span class="vturn">Multi-turn</span></div>
+          <div class="vchip"        data-val="Globe"      data-turn="Multi-turn" onclick="pickValve(this)"><span class="vname">Globe</span><span class="vturn">Multi-turn</span></div>
+          <div class="vchip"        data-val="Sluice Gate"data-turn="Multi-turn" onclick="pickValve(this)"><span class="vname">Sluice Gate</span><span class="vturn">Multi-turn</span></div>
         </div>
       </div>
 
-      <!-- INFERRED TURN TYPE INDICATOR — read-only feedback -->
+      <!-- Read-only inferred turn type indicator -->
       <div id="turn-pill" class="turn-pill">
-        <div class="pill-icon"></div>
-        <span class="pill-label">Turn type: All</span>
+        <div class="dot"></div><span class="lbl">Turn type: All</span>
       </div>
 
-      <!-- SPECIAL REQUIREMENT -->
+      <!-- Special requirement -->
       <div class="f">
         <label>Special Requirement</label>
         <div class="chips" id="spchips">
-          <span class="chip sp on" data-val="none" onclick="pickSp(this)">None</span>
-          <span class="chip sp" data-val="declutch" onclick="pickSp(this)"
-            title="For double-acting pneumatic actuators requiring manual override without actuator removal">Declutch</span>
-          <span class="chip sp" data-val="spring-return" onclick="pickSp(this)"
-            title="For single-acting spring-return actuators — optimized for asymmetric BTO/BTC torque profiles">Spring Return</span>
+          <span class="chip sp on" data-val="none"          onclick="pickSp(this)">None</span>
+          <span class="chip sp"    data-val="declutch"       onclick="pickSp(this)" title="Double-acting pneumatic actuators">Declutch</span>
+          <span class="chip sp"    data-val="spring-return"  onclick="pickSp(this)" title="Single-acting spring-return actuators">Spring Return</span>
         </div>
       </div>
 
-      <!-- VALVE FLANGE (ISO only — PS/SG/SS are handwheel types, not valve flanges) -->
+      <!-- Valve ISO flange — only ISO 5211 and IS-series here; PS/SG/SS are handwheel types -->
       <div class="f">
         <label>Valve ISO Flange (Output Interface)</label>
         <select id="vflange">
           <option value="any">Any / Not Specified</option>
           <optgroup label="ISO 5211 (F / FA)">
-            <option value="F05">F05 / FA05</option>
-            <option value="F07">F07 / FA07</option>
-            <option value="F10">F10 / FA10</option>
-            <option value="F12">F12 / FA12</option>
-            <option value="F14">F14 / FA14</option>
-            <option value="F16">F16 / FA16</option>
-            <option value="F25">F25 / FA25</option>
-            <option value="F30">F30 / FA30</option>
-            <option value="F35">F35 / FA35</option>
-            <option value="F40">F40 / FA40</option>
+            <option value="F05">F05 / FA05</option><option value="F07">F07 / FA07</option>
+            <option value="F10">F10 / FA10</option><option value="F12">F12 / FA12</option>
+            <option value="F14">F14 / FA14</option><option value="F16">F16 / FA16</option>
+            <option value="F25">F25 / FA25</option><option value="F30">F30 / FA30</option>
+            <option value="F35">F35 / FA35</option><option value="F40">F40 / FA40</option>
           </optgroup>
           <optgroup label="IS Series (F200&ndash;F800)">
-            <option value="F200">F200</option>
-            <option value="F300">F300</option>
-            <option value="F400">F400</option>
-            <option value="F500">F500</option>
-            <option value="F600">F600</option>
-            <option value="F700">F700</option>
+            <option value="F200">F200</option><option value="F300">F300</option>
+            <option value="F400">F400</option><option value="F500">F500</option>
+            <option value="F600">F600</option><option value="F700">F700</option>
             <option value="F800">F800</option>
           </optgroup>
         </select>
       </div>
 
-      <!-- TORQUE -->
+      <!-- Required torque -->
       <div>
         <div style="font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;">Required Output Torque</div>
         <div class="trow">
           <div class="f"><input type="number" id="tval" placeholder="e.g. 5000" min="0" oninput="updateNm()"></div>
           <div class="f">
             <select id="tunit" onchange="updateNm()">
-              <option value="Nm">Nm</option>
-              <option value="ftlb">ft-lb</option>
-              <option value="inlb">in-lb</option>
+              <option value="Nm">Nm</option><option value="ftlb">ft-lb</option><option value="inlb">in-lb</option>
             </select>
           </div>
         </div>
@@ -264,10 +324,9 @@
   </div>
 
   <button class="btn" onclick="run()">&#9881; Find Matching Gearboxes</button>
-
   <hr>
 
-  <!-- HANDWHEEL -->
+  <!-- Handwheel calculator — populated after "Use HW" is clicked in detail view -->
   <div>
     <div class="slabel">Handwheel Sizing</div>
     <div class="fg">
@@ -275,15 +334,12 @@
         <label>Rim Pull &mdash; standard 360 N (81 lbs)</label>
         <input type="number" id="hwrp" placeholder="360" value="360" oninput="calcHW()">
       </div>
-      <div id="hwbox" class="hwbox">
-        <span class="warn">Select a model via &ldquo;Use HW&rdquo; in the detail view.</span>
-      </div>
+      <div id="hwbox" class="hwbox"><span class="warn">Select a model via &ldquo;Use HW&rdquo; in the detail view.</span></div>
     </div>
   </div>
-
   <hr>
 
-  <!-- TORQUE CONVERTER -->
+  <!-- Quick torque converter -->
   <div>
     <div class="slabel">Quick Torque Converter</div>
     <div class="trow">
@@ -318,10 +374,304 @@
     <p>Select your valve type, enter the required torque, then click <strong>Find Matching Gearboxes</strong>.</p>
   </div>
 </main>
-</div>
+</div><!-- end layout -->
+</div><!-- end page-cfg -->
 
+
+<!-- ════════════════════════════════════════════════════════
+     PAGE 2 — INTERFACE COMPATIBILITY & MACHINING
+════════════════════════════════════════════════════════ -->
+<div class="page" id="page-compat">
+<div class="compat-layout">
+
+  <!-- ── SECTION 1: VALVE INTERFACE ── -->
+  <div class="sec">
+    <div class="sec-title"><span class="num">1</span>Valve Interface</div>
+    <div class="fg">
+
+      <!-- Unit system toggle — all fields below respect this -->
+      <div class="f">
+        <label>Unit System</label>
+        <div class="unit-toggle" id="unitToggle">
+          <button class="on" onclick="setUnits('mm',this)">mm (metric)</button>
+          <button onclick="setUnits('in',this)">in (imperial)</button>
+        </div>
+      </div>
+
+      <!-- Mounting standard -->
+      <div class="f" id="f-mount-std">
+        <label>Mounting Standard</label>
+        <select id="mountStd" onchange="onMountStdChange()">
+          <option value="">-- Select --</option>
+          <option value="iso">ISO 5211</option>
+          <option value="mss">MSS SP-101 (AWWA)</option>
+          <option value="custom">Custom / Non-standard</option>
+        </select>
+        <span class="err">Required</span>
+      </div>
+
+      <!-- ISO flange size — shown only when ISO 5211 selected -->
+      <div class="cond" id="cond-iso">
+        <div class="f" id="f-flange-size">
+          <label>ISO 5211 Flange Size</label>
+          <select id="flangeSize">
+            <option value="">-- Select --</option>
+            <option value="F05">F05 / FA05</option><option value="F07">F07 / FA07</option>
+            <option value="F10">F10 / FA10</option><option value="F12">F12 / FA12</option>
+            <option value="F14">F14 / FA14</option><option value="F16">F16 / FA16</option>
+            <option value="F25">F25 / FA25</option><option value="F30">F30 / FA30</option>
+            <option value="F35">F35 / FA35</option><option value="F40">F40 / FA40</option>
+          </select>
+          <span class="err">Required</span>
+        </div>
+      </div>
+
+      <!-- Custom BCD fields — shown for custom or MSS -->
+      <div class="cond" id="cond-custom-flange">
+        <div class="trow3">
+          <div class="f" id="f-bcd">
+            <label>Bolt Circle Dia (BCD) <span id="lbl-bcd-unit">mm</span></label>
+            <input type="number" id="bcd" min="0" placeholder="e.g. 140">
+            <span class="err">Required</span>
+          </div>
+          <div class="f" id="f-nbolt">
+            <label>No. of Bolts</label>
+            <select id="nBolt">
+              <option value="">--</option>
+              <option value="4">4</option><option value="8">8</option>
+              <option value="12">12</option><option value="16">16</option>
+            </select>
+            <span class="err">Required</span>
+          </div>
+          <div class="f">
+            <label>Bolt / Stud Size</label>
+            <select id="boltSize">
+              <option value="">--</option>
+              <option value="M6">M6</option><option value="M8">M8</option>
+              <option value="M10">M10</option><option value="M12">M12</option>
+              <option value="M16">M16</option><option value="M20">M20</option>
+              <option value="M30">M30</option><option value="M36">M36</option>
+              <option value="1/4\"">1/4"</option><option value="5/16\"">5/16"</option>
+              <option value="3/8\"">3/8"</option><option value="1/2\"">1/2"</option>
+              <option value="5/8\"">5/8"</option><option value="3/4\"">3/4"</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: VALVE STEM ── -->
+  <div class="sec">
+    <div class="sec-title"><span class="num">2</span>Valve Stem Details</div>
+    <div class="fg">
+
+      <!-- Stem shape selection -->
+      <div class="f" id="f-stem-shape">
+        <label>Stem Profile / Drive Type</label>
+        <select id="stemShape" onchange="onStemShapeChange()">
+          <option value="">-- Select --</option>
+          <option value="square">Square (across flats)</option>
+          <option value="dd">Double-D (DD / parallel-flat)</option>
+          <option value="keyed">Round with Keyway (ANSI B17.1)</option>
+          <option value="round">Plain Round (no drive feature)</option>
+          <option value="splined">Splined</option>
+        </select>
+        <span class="err">Required</span>
+      </div>
+
+      <!-- SQUARE stem fields -->
+      <div class="cond" id="cond-square">
+        <div class="stem-hint">Square stem: measure across flats (A/F), not corner-to-corner. All dimensions in selected units.</div>
+        <div class="trow" style="margin-top:8px;">
+          <div class="f" id="f-sq-af">
+            <label>Across Flats (A/F) <span class="unit-lbl">mm</span></label>
+            <input type="number" id="sqAF" min="0" step="0.01" placeholder="e.g. 32">
+            <span class="err">Required</span>
+          </div>
+          <div class="f">
+            <label>Stem Height Above Flange <span class="unit-lbl">mm</span></label>
+            <input type="number" id="sqHeight" min="0" step="0.01" placeholder="e.g. 45">
+          </div>
+        </div>
+      </div>
+
+      <!-- DOUBLE-D stem fields -->
+      <div class="cond" id="cond-dd">
+        <div class="stem-hint">DD stem: provide the nominal shaft diameter. The flat-to-flat (chord) dimension is derived from DD coupling tables. Confirm with actuator manufacturer's coupling spec.</div>
+        <div class="trow3" style="margin-top:8px;">
+          <div class="f" id="f-dd-dia">
+            <label>DD Shaft Dia <span class="unit-lbl">mm</span></label>
+            <input type="number" id="ddDia" min="0" step="0.01" placeholder="e.g. 20">
+            <span class="err">Required</span>
+          </div>
+          <div class="f" id="f-dd-depth">
+            <label>DD Depth (d) <span class="unit-lbl">mm</span></label>
+            <input type="number" id="ddDepth" min="0" step="0.01" placeholder="e.g. 14">
+            <span class="err">Required</span>
+          </div>
+          <div class="f">
+            <label>Stem Height Above Flange <span class="unit-lbl">mm</span></label>
+            <input type="number" id="ddHeight" min="0" step="0.01" placeholder="e.g. 45">
+          </div>
+        </div>
+      </div>
+
+      <!-- KEYED stem fields -->
+      <div class="cond" id="cond-keyed">
+        <div class="stem-hint">Provide stem diameter, key width, key depth (from surface), and stem height. Key orientation (axial position) optional but required for full machining callout.</div>
+        <div class="trow" style="margin-top:8px;">
+          <div class="f" id="f-k-dia">
+            <label>Stem Dia <span class="unit-lbl">mm</span></label>
+            <input type="number" id="kDia" min="0" step="0.01" placeholder="e.g. 25">
+            <span class="err">Required</span>
+          </div>
+          <div class="f">
+            <label>Stem Height Above Flange <span class="unit-lbl">mm</span></label>
+            <input type="number" id="kHeight" min="0" step="0.01" placeholder="e.g. 50">
+          </div>
+        </div>
+        <div class="trow3" style="margin-top:10px;">
+          <div class="f" id="f-kw">
+            <label>Key Width <span class="unit-lbl">mm</span></label>
+            <input type="number" id="kW" min="0" step="0.01" placeholder="e.g. 8">
+            <span class="err">Required</span>
+          </div>
+          <div class="f" id="f-kd">
+            <label>Key Depth <span class="unit-lbl">mm</span></label>
+            <input type="number" id="kD" min="0" step="0.01" placeholder="e.g. 3.3">
+            <span class="err">Required</span>
+          </div>
+          <div class="f">
+            <label>No. of Keys</label>
+            <select id="nKeys">
+              <option value="1">1</option><option value="2">2 (opposite)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROUND stem fields -->
+      <div class="cond" id="cond-round">
+        <div class="stem-hint">Plain round stem: gearbox sleeve must be bored and pinned or friction-clamped. Confirm drive method with engineering.</div>
+        <div class="trow" style="margin-top:8px;">
+          <div class="f" id="f-r-dia">
+            <label>Stem Dia <span class="unit-lbl">mm</span></label>
+            <input type="number" id="rDia" min="0" step="0.01" placeholder="e.g. 25">
+            <span class="err">Required</span>
+          </div>
+          <div class="f">
+            <label>Stem Height Above Flange <span class="unit-lbl">mm</span></label>
+            <input type="number" id="rHeight" min="0" step="0.01" placeholder="e.g. 50">
+          </div>
+        </div>
+      </div>
+
+      <!-- SPLINED -->
+      <div class="cond" id="cond-splined">
+        <div class="stem-hint" style="color:var(--yellow);">Splined drive: consult Rotork engineering. Custom sleeve machining required. Provide spline specification (module, number of teeth, or SAE/DIN reference) in the notes field below.</div>
+        <div class="f" style="margin-top:8px;">
+          <label>Spline Specification (module / tooth count / standard)</label>
+          <input type="text" id="splineSpec" placeholder="e.g. SAE 16/32, 10T or DIN 5480 W30x2">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: GEARBOX SELECTION ── -->
+  <div class="sec">
+    <div class="sec-title">
+      <span class="num">3</span>Gearbox Selection
+      <span style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">Auto-populated from Selector tab</span>
+        <button class="btn2" style="padding:4px 12px;font-size:11px;" onclick="importFromSelector(null,null,true)" title="Re-import best match from Gearbox Selector">&#8635; Re-import</button>
+      </span>
+    </div>
+    <div class="fg">
+
+      <div class="trow">
+        <div class="f" id="f-gb-series">
+          <label>Gearbox Series</label>
+          <select id="gbSeries" onchange="onGbSeriesChange()">
+            <option value="">-- Select --</option>
+            <option value="IW">IW MK2 (Part-turn worm)</option>
+            <option value="MOW">MOW (Part-turn worm, metric)</option>
+            <option value="AB">AB Series (Part-turn manual)</option>
+            <option value="ILG-S">ILG-S (Spring-return override)</option>
+            <option value="ILG-D">ILG-D (Declutchable)</option>
+            <option value="IB">IB Series (Multi-turn bevel)</option>
+            <option value="IS">IS Series (Multi-turn spur)</option>
+          </select>
+          <span class="err">Required</span>
+        </div>
+        <div class="f" id="f-gb-model">
+          <label>Gearbox Model</label>
+          <select id="gbModel">
+            <option value="">-- Select series first --</option>
+          </select>
+          <span class="err">Required</span>
+        </div>
+      </div>
+
+      <div class="f" id="f-sleeve-state">
+        <label>Output Drive Sleeve / Adapter State</label>
+        <select id="sleeveState">
+          <option value="">-- Select --</option>
+          <option value="blank">Blank (un-machined) — machining required</option>
+          <option value="machined-std">Pre-machined to standard (specify below)</option>
+          <option value="machined-custom">Pre-machined custom — verify dimensions</option>
+        </select>
+        <span class="err">Required</span>
+      </div>
+
+      <!-- Pre-machined standard detail -->
+      <div class="cond" id="cond-premach">
+        <div class="f">
+          <label>Pre-machined Standard Profile</label>
+          <select id="premachProfile">
+            <option value="">-- Select --</option>
+            <option value="square">Square bore (specify A/F)</option>
+            <option value="dd">Double-D bore (specify dia)</option>
+            <option value="keyed">Keyed bore (specify dia + key)</option>
+            <option value="round">Plain round bore</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Additional notes -->
+      <div class="f">
+        <label>Additional Notes / Special Requirements (optional)</label>
+        <input type="text" id="extraNotes" placeholder="e.g. stainless sleeve required, special coating, ATEX...">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── RUN BUTTON ── -->
+  <button class="btn" onclick="runCompat()">&#128269; Check Compatibility &amp; Generate Machining Notes</button>
+
+  <!-- ── RESULT PANEL — populated by JS ── -->
+  <div id="compatResult"></div>
+
+</div><!-- end compat-layout -->
+</div><!-- end page-compat -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
 <script>
-// ── GEARBOX DATA (verified against Rotork brochures) ─────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   GEARBOX DATA
+   Sources:
+     IW MK2  : pub028-079-00-0220 (Rotork, Aug 2023)
+     ILG-D   : pub038-001-00 (Rotork, Jun 2016)
+     ILG-S   : ILG-S installation manual 2011-rev.00
+     AB      : eurovalve AB brochure RG-QTHC-001
+     IB / IS : Rotork-Valve-Gearbox.pdf
+═══════════════════════════════════════════════════════════ */
 
 var HW_SG=[
   {hw:'SG200',mm:200},{hw:'SG250',mm:250},{hw:'SG300',mm:300},{hw:'SG350',mm:350},
@@ -342,282 +692,313 @@ var HW_SS=[
 var HW_TYPE_DESC={
   SG:'Cast iron, powder-coated. General industrial / waterworks / HVAC.',
   PS:'Compact post-style. Corrosive, marine, offshore, or confined-space.',
-  SS:'Stainless steel construction. Aggressive corrosive, offshore, hygienic.'
+  SS:'Stainless steel. Aggressive corrosive, offshore, hygienic environments.'
 };
 
+/*
+  maxBoreMm     : max bore of output sleeve (mm) — derived from brochure
+  maxSqAFMm     : max square A/F the sleeve will accept (mm)
+  maxStemHMm    : max stem height above valve mounting face (mm)
+  outFlanges    : ISO 5211 output flange designations (FA = with pilot spigot)
+  driveOptions  : standard drive profiles available on this model
+*/
 var GB=[
-  {
-    id:'IB',series:'IB Series',type:'Bevel Gear',turn:'Multi-turn',
-    valves:['Gate','Globe','Any'],specials:[],
-    torqueMaxNm:8135,torqueNote:'Up to 8,135 Nm (6,000 ft-lb)',
-    outFlanges:['FA07','FA10','FA14','FA16','FA25','FA30','FA35','FA40'],
-    hwTypes:[],env:'Industrial, harsh',
-    notes:'Heavy-duty cast iron bevel gear for high-thrust multi-turn motorised/isolating applications. Ratios 1:1\u20138:1. 14 sizes. Used with IQ/IQM actuators.',
-    models:[
-      {m:'IB2', tNm:305,  thrklb:12,    iF:'FA10 & FA14',       oF:'FA07/FA10', ma:null},
-      {m:'IB3', tNm:305,  thrklb:40,    iF:'FA10 & FA14',       oF:'FA14',      ma:null},
-      {m:'IB4', tNm:678,  thrklb:12,    iF:'FA10 & FA14',       oF:'FA10',      ma:null},
-      {m:'IB5', tNm:678,  thrklb:40,    iF:'FA10 & FA14',       oF:'FA14, FA16',ma:null},
-      {m:'IB6', tNm:1356, thrklb:40,    iF:'FA10, FA14 & FA16', oF:'FA14, FA16',ma:null},
-      {m:'IB7', tNm:1356, thrklb:60,    iF:'FA10, FA14 & FA16', oF:'FA16, FA25',ma:null},
-      {m:'IB8', tNm:2034, thrklb:60,    iF:'FA14, FA16 & FA25', oF:'FA16, FA25',ma:null},
-      {m:'IB9', tNm:2034, thrklb:80,    iF:'FA14, FA16 & FA25', oF:'FA25, FA30',ma:null},
-      {m:'IB10',tNm:4067, thrklb:80,    iF:'FA14, FA16 & FA25', oF:'FA25, FA30',ma:null},
-      {m:'IB11',tNm:4067, thrklb:112.5, iF:'FA14, FA16 & FA25', oF:'FA30, FA35',ma:null},
-      {m:'IB12',tNm:8135, thrklb:112.5, iF:'FA14, FA16 & FA25', oF:'FA30, FA35',ma:null},
-      {m:'IB13',tNm:8135, thrklb:187.5, iF:'FA14, FA16 & FA25', oF:'FA35, FA40',ma:null},
-      {m:'IB14',tNm:8135, thrklb:296.75,iF:'FA14, FA16 & FA25', oF:'FA40',      ma:null},
-    ]
+  /* ── IB SERIES ── */
+  {id:'IB',series:'IB Series',type:'Bevel Gear',turn:'Multi-turn',
+   valves:['Gate','Globe','Any'],specials:[],
+   torqueMaxNm:8135,torqueNote:'Up to 8,135 Nm (6,000 ft-lb)',
+   outFlanges:['FA07','FA10','FA14','FA16','FA25','FA30','FA35','FA40'],
+   hwTypes:[],env:'Industrial, harsh',
+   notes:'Heavy-duty cast iron bevel gear for high-thrust multi-turn motorised/isolating applications. Ratios 1:1\u20138:1. 14 sizes.',
+   models:[
+     {m:'IB2', tNm:305,  thrklb:12,    iF:'FA10 & FA14', oF:'FA07/FA10', ma:null, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB3', tNm:305,  thrklb:40,    iF:'FA10 & FA14', oF:'FA14',      ma:null, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB4', tNm:678,  thrklb:12,    iF:'FA10 & FA14', oF:'FA10',      ma:null, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB5', tNm:678,  thrklb:40,    iF:'FA10 & FA14', oF:'FA14, FA16',ma:null, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB6', tNm:1356, thrklb:40,    iF:'FA10,FA14,FA16',oF:'FA14,FA16',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB7', tNm:1356, thrklb:60,    iF:'FA10,FA14,FA16',oF:'FA16,FA25',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB8', tNm:2034, thrklb:60,    iF:'FA14,FA16,FA25',oF:'FA16,FA25',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB9', tNm:2034, thrklb:80,    iF:'FA14,FA16,FA25',oF:'FA25,FA30',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB10',tNm:4067, thrklb:80,    iF:'FA14,FA16,FA25',oF:'FA25,FA30',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB11',tNm:4067, thrklb:112.5, iF:'FA14,FA16,FA25',oF:'FA30,FA35',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB12',tNm:8135, thrklb:112.5, iF:'FA14,FA16,FA25',oF:'FA30,FA35',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB13',tNm:8135, thrklb:187.5, iF:'FA14,FA16,FA25',oF:'FA35,FA40',ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IB14',tNm:8135, thrklb:296.75,iF:'FA14,FA16,FA25',oF:'FA40',     ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+   ]
   },
-  {
-    id:'IS',series:'IS Series',type:'Spur Gear (Multi-turn)',turn:'Multi-turn',
-    valves:['Gate','Globe','Any'],specials:[],
-    torqueMaxNm:2542,torqueNote:'Up to 2,542 Nm (1,875 ft-lb) manual',
-    outFlanges:['F200','F300','F400','F500','F600','F700','F800'],
-    hwTypes:[],env:'Industrial, harsh',
-    notes:'Heavy-duty cast iron spur gear for high-thrust motorised applications. Proprietary IS-series output flanges F200\u2013F800. Used with IQ/IQT actuators. 7 sizes.',
-    models:[
-      {m:'IS2',tNm:508,  thrklb:12,motoNm:407, ma:null},
-      {m:'IS3',tNm:508,  thrklb:40,motoNm:407, ma:null},
-      {m:'IS4',tNm:847,  thrklb:12,motoNm:678, ma:5.4},
-      {m:'IS5',tNm:847,  thrklb:40,motoNm:678, ma:5.4},
-      {m:'IS6',tNm:1695, thrklb:40,motoNm:1356,ma:5.4},
-      {m:'IS7',tNm:1695, thrklb:80,motoNm:1356,ma:5.4},
-      {m:'IS8',tNm:2542, thrklb:80,motoNm:2034,ma:9.18},
-    ]
+  /* ── IS SERIES ── */
+  {id:'IS',series:'IS Series',type:'Spur Gear (Multi-turn)',turn:'Multi-turn',
+   valves:['Gate','Globe','Any'],specials:[],
+   torqueMaxNm:2542,torqueNote:'Up to 2,542 Nm manual',
+   outFlanges:['F200','F300','F400','F500','F600','F700','F800'],
+   hwTypes:[],env:'Industrial, harsh',
+   notes:'Heavy-duty cast iron spur gear. Proprietary IS-series flanges F200\u2013F800.',
+   models:[
+     {m:'IS2',tNm:508, thrklb:12,ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IS3',tNm:508, thrklb:40,ma:null,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IS4',tNm:847, thrklb:12,ma:5.4, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IS5',tNm:847, thrklb:40,ma:5.4, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IS6',tNm:1695,thrklb:40,ma:5.4, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IS7',tNm:1695,thrklb:80,ma:5.4, maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+     {m:'IS8',tNm:2542,thrklb:80,ma:9.18,maxBoreMm:null,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round']},
+   ]
   },
-  {
-    id:'IW',series:'IW MK2 Series',type:'Worm Gear (Part-turn)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Any'],specials:[],
-    torqueMaxNm:203000,torqueNote:'Up to 203,000 Nm (IW13)',
-    outFlanges:['FA10','FA14','FA16','FA25','FA30','FA35','FA40','FA48','FA60'],
-    hwTypes:[],env:'Power, Oil & Gas',
-    notes:'High-torque worm gear for quarter-turn motorised isolation. Inherently self-locking. Optional spur auxiliary reducers for higher ratios. 23 sizes.',
-    models:[
-      {m:'IW3',  ratio:48, tNm:1085,  ma:15},
-      {m:'IW36', ratio:48, tNm:1500,  ma:15},
-      {m:'IW4',  ratio:46, tNm:2440,  ma:16},
-      {m:'IW46', ratio:46, tNm:2900,  ma:16},
-      {m:'IW5',  ratio:48, tNm:4447,  ma:16},
-      {m:'IW52', ratio:48, tNm:6670,  ma:16},
-      {m:'IW56', ratio:48, tNm:8000,  ma:16},
-      {m:'IW6',  ratio:76, tNm:9924,  ma:25},
-      {m:'IW66', ratio:76, tNm:12000, ma:25},
-      {m:'IW7',  ratio:64, tNm:15253, ma:21},
-      {m:'IW72', ratio:64, tNm:20000, ma:21},
-      {m:'IW76', ratio:64, tNm:26000, ma:21},
-      {m:'IW8',  ratio:64, tNm:32000, ma:20},
-      {m:'IW82', ratio:64, tNm:37000, ma:20},
-      {m:'IW86', ratio:64, tNm:44500, ma:20},
-      {m:'IW9',  ratio:58, tNm:52171, ma:21},
-      {m:'IW96', ratio:58, tNm:63500, ma:21},
-      {m:'IW10', ratio:74, tNm:70000, ma:26},
-      {m:'IW106',ratio:74, tNm:100000,ma:26},
-      {m:'IW11', ratio:73, tNm:108464,ma:26},
-      {m:'IW116',ratio:73, tNm:141000,ma:26},
-      {m:'IW126',ratio:70, tNm:180000,ma:27},
-      {m:'IW13', ratio:70, tNm:203000,ma:27},
-    ]
+  /* ── IW MK2 ── max bore & square bore from brochure table */
+  {id:'IW',series:'IW MK2 Series',type:'Worm Gear (Part-turn)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Any'],specials:[],
+   torqueMaxNm:203000,torqueNote:'Up to 203,000 Nm (IW13)',
+   outFlanges:['FA10','FA14','FA16','FA25','FA30','FA35','FA40','FA48','FA60'],
+   hwTypes:[],env:'Power, Oil & Gas',
+   notes:'High-torque worm gear for quarter-turn motorised isolation. 23 sizes.',
+   models:[
+     /* maxBoreMm=max rect key bore, maxSqAFMm=max square A/F, maxStemHMm not published (consult) */
+     {m:'IW3',  ratio:48, tNm:1085,  ma:15, maxBoreMm:45, maxSqAFMm:36, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW36', ratio:48, tNm:1500,  ma:15, maxBoreMm:45, maxSqAFMm:36, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW4',  ratio:46, tNm:2440,  ma:16, maxBoreMm:64, maxSqAFMm:51, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW46', ratio:46, tNm:2900,  ma:16, maxBoreMm:64, maxSqAFMm:51, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW5',  ratio:48, tNm:4447,  ma:16, maxBoreMm:76, maxSqAFMm:62, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW52', ratio:48, tNm:6670,  ma:16, maxBoreMm:76, maxSqAFMm:62, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW56', ratio:48, tNm:8000,  ma:16, maxBoreMm:76, maxSqAFMm:62, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW6',  ratio:76, tNm:9924,  ma:25, maxBoreMm:102,maxSqAFMm:83, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW66', ratio:76, tNm:12000, ma:25, maxBoreMm:102,maxSqAFMm:83, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW7',  ratio:64, tNm:15253, ma:21, maxBoreMm:136,maxSqAFMm:109,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW72', ratio:64, tNm:20000, ma:21, maxBoreMm:136,maxSqAFMm:109,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW76', ratio:64, tNm:26000, ma:21, maxBoreMm:136,maxSqAFMm:109,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW8',  ratio:64, tNm:32000, ma:20, maxBoreMm:157,maxSqAFMm:123,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW82', ratio:64, tNm:37000, ma:20, maxBoreMm:157,maxSqAFMm:123,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW86', ratio:64, tNm:44500, ma:20, maxBoreMm:157,maxSqAFMm:123,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW9',  ratio:58, tNm:52171, ma:21, maxBoreMm:178,maxSqAFMm:132,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW96', ratio:58, tNm:63500, ma:21, maxBoreMm:178,maxSqAFMm:132,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW10', ratio:74, tNm:70000, ma:26, maxBoreMm:203,maxSqAFMm:153,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW106',ratio:74, tNm:100000,ma:26, maxBoreMm:203,maxSqAFMm:153,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW11', ratio:73, tNm:108464,ma:26, maxBoreMm:270,maxSqAFMm:190,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW116',ratio:73, tNm:141000,ma:26, maxBoreMm:270,maxSqAFMm:190,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW126',ratio:70, tNm:180000,ma:27, maxBoreMm:272,maxSqAFMm:180,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'IW13', ratio:70, tNm:203000,ma:27, maxBoreMm:272,maxSqAFMm:180,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+   ]
   },
-  {
-    id:'MOW',series:'MOW Series',type:'Worm Gear (Part-turn, Metric)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Any'],specials:[],
-    torqueMaxNm:47700,torqueNote:'Up to 47,700 Nm (MOW11)',
-    outFlanges:['F10','FA10','F14','FA14','F16','FA16','F25','FA25','F30','FA30'],
-    hwTypes:[],env:'Industrial, Oil & Gas (Metric)',
-    notes:'Metric equivalent of IW MK2. Same worm gear design with metric ISO flange designations. 9 sizes MOW3\u2013MOW11.',
-    models:[
-      {m:'MOW3', ratio:48,tNm:563,  ma:18},
-      {m:'MOW4', ratio:46,tNm:1090, ma:19},
-      {m:'MOW5', ratio:48,tNm:3000, ma:19},
-      {m:'MOW6', ratio:76,tNm:4500, ma:31},
-      {m:'MOW7', ratio:64,tNm:9000, ma:25},
-      {m:'MOW8', ratio:64,tNm:16700,ma:25},
-      {m:'MOW9', ratio:58,tNm:23900,ma:25},
-      {m:'MOW10',ratio:74,tNm:37500,ma:31},
-      {m:'MOW11',ratio:73,tNm:47700,ma:31},
-    ]
+  /* ── MOW ── */
+  {id:'MOW',series:'MOW Series',type:'Worm Gear (Part-turn, Metric)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Any'],specials:[],
+   torqueMaxNm:47700,torqueNote:'Up to 47,700 Nm (MOW11)',
+   outFlanges:['F10','FA10','F14','FA14','F16','FA16','F25','FA25','F30','FA30'],
+   hwTypes:[],env:'Industrial, Oil & Gas (Metric)',
+   notes:'Metric equivalent of IW MK2. 9 sizes MOW3\u2013MOW11.',
+   models:[
+     {m:'MOW3', ratio:48,tNm:563,   ma:18, maxBoreMm:45, maxSqAFMm:36, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW4', ratio:46,tNm:1090,  ma:19, maxBoreMm:64, maxSqAFMm:51, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW5', ratio:48,tNm:3000,  ma:19, maxBoreMm:76, maxSqAFMm:62, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW6', ratio:76,tNm:4500,  ma:31, maxBoreMm:102,maxSqAFMm:83, maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW7', ratio:64,tNm:9000,  ma:25, maxBoreMm:136,maxSqAFMm:109,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW8', ratio:64,tNm:16700, ma:25, maxBoreMm:157,maxSqAFMm:123,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW9', ratio:58,tNm:23900, ma:25, maxBoreMm:178,maxSqAFMm:132,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW10',ratio:74,tNm:37500, ma:31, maxBoreMm:203,maxSqAFMm:153,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'MOW11',ratio:73,tNm:47700, ma:31, maxBoreMm:270,maxSqAFMm:190,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+   ]
   },
-  {
-    id:'AB-SG',series:'AB Series (SG Handwheel)',type:'Worm Gear (Part-turn)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Damper','Any'],specials:[],
-    torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (A250/SP9)',
-    outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
-    hwTypes:['SG'],hwDesc:'SG cast-iron handwheel \u2014 general industrial, chemical, power, waterworks, HVAC.',
-    env:'General Industrial / Water / Process',
-    notes:'Cast iron worm gearbox with SG cast-iron handwheel. IP67 standard (N-type). General industrial, chemical, waterworks, and HVAC applications. 13 models, ratios 37:1\u2013705:1.',
-    models:[
-      {m:'AB150',      ratio:'40:1',  tNm:150,  inp:16,  ma:9.6,  stemH:38},
-      {m:'AB210',      ratio:'37:1',  tNm:330,  inp:28.5,ma:11.6, stemH:45},
-      {m:'AB215',      ratio:'37:1',  tNm:500,  inp:43,  ma:11.6, stemH:45},
-      {m:'AB550',      ratio:'34:1',  tNm:1000, inp:83,  ma:12,   stemH:79},
-      {m:'AB880',      ratio:'38:1',  tNm:2000, inp:152, ma:13.2, stemH:82},
-      {m:'AB1250',     ratio:'55:1',  tNm:3250, inp:171, ma:19,   stemH:91},
-      {m:'AB1950',     ratio:'52:1',  tNm:5500, inp:289, ma:19,   stemH:111},
-      {m:'AB1950/SP4', ratio:'208:1', tNm:6800, inp:125, ma:54.4, stemH:111},
-      {m:'AB6800',     ratio:'78:1',  tNm:8400, inp:305, ma:27.5, stemH:121},
-      {m:'AB6800/SP4', ratio:'312:1', tNm:12500,inp:134, ma:93.6, stemH:121},
-      {m:'AB6800/SP6', ratio:'468:1', tNm:17000,inp:122, ma:140,  stemH:121},
-      {m:'A200/SP9',   ratio:'705:1', tNm:26000,inp:142, ma:183,  stemH:169},
-      {m:'A250/SP9',   ratio:'705:1', tNm:32000,inp:166, ma:193,  stemH:169},
-    ]
+  /* ── AB-SG ── max stem heights from AB brochure (mm converted from inches) */
+  {id:'AB-SG',series:'AB Series (SG Handwheel)',type:'Worm Gear (Part-turn)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Damper','Any'],specials:[],
+   torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (A250/SP9)',
+   outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
+   hwTypes:['SG'],hwDesc:'SG cast-iron handwheel \u2014 general industrial.',
+   env:'General Industrial / Water / Process',
+   notes:'Cast iron worm gearbox with SG handwheel. IP67 standard. 13 models.',
+   models:[
+     /* maxBoreMm derived from insert table; maxSqAFMm=insert max bore; maxStemHMm from brochure (mm) */
+     {m:'AB150',      ratio:'40:1', tNm:150,  inp:16,  ma:9.6,  stemH:38,  maxBoreMm:18,  maxSqAFMm:null,maxStemHMm:38,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB210',      ratio:'37:1', tNm:330,  inp:28.5,ma:11.6, stemH:45,  maxBoreMm:25,  maxSqAFMm:null,maxStemHMm:45,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB215',      ratio:'37:1', tNm:500,  inp:43,  ma:11.6, stemH:45,  maxBoreMm:32,  maxSqAFMm:null,maxStemHMm:45,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB550',      ratio:'34:1', tNm:1000, inp:83,  ma:12,   stemH:79,  maxBoreMm:45,  maxSqAFMm:null,maxStemHMm:79,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB880',      ratio:'38:1', tNm:2000, inp:152, ma:13.2, stemH:82,  maxBoreMm:60,  maxSqAFMm:null,maxStemHMm:82,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB1250',     ratio:'55:1', tNm:3250, inp:171, ma:19,   stemH:91,  maxBoreMm:60,  maxSqAFMm:null,maxStemHMm:91,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB1950',     ratio:'52:1', tNm:5500, inp:289, ma:19,   stemH:111, maxBoreMm:75,  maxSqAFMm:null,maxStemHMm:111, driveOptions:['square','keyed','round','dd']},
+     {m:'AB1950/SP4', ratio:'208:1',tNm:6800, inp:125, ma:54.4, stemH:111, maxBoreMm:75,  maxSqAFMm:null,maxStemHMm:111, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800',     ratio:'78:1', tNm:8400, inp:305, ma:27.5, stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800/SP4', ratio:'312:1',tNm:12500,inp:134, ma:93.6, stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800/SP6', ratio:'468:1',tNm:17000,inp:122, ma:140,  stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'A200/SP9',   ratio:'705:1',tNm:26000,inp:142, ma:183,  stemH:169, maxBoreMm:150, maxSqAFMm:null,maxStemHMm:169, driveOptions:['square','keyed','round','dd']},
+     {m:'A250/SP9',   ratio:'705:1',tNm:32000,inp:166, ma:193,  stemH:169, maxBoreMm:150, maxSqAFMm:null,maxStemHMm:169, driveOptions:['square','keyed','round','dd']},
+   ]
   },
-  {
-    id:'AB-PS',series:'AB Series (PS Handwheel)',type:'Worm Gear (Part-turn)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Damper','Any'],specials:[],
-    torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (A250/SP9)',
-    outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
-    hwTypes:['PS'],hwDesc:'PS compact post-style handwheel \u2014 corrosive, marine, offshore, or confined-space.',
-    env:'Corrosive / Marine / Confined Space',
-    notes:'Cast iron worm gearbox with PS compact post-style handwheel. IP67 standard, IP68 optional (G/W-type). Corrosive, marine, offshore, and buried service. Same torque range as SG variant.',
-    models:[
-      {m:'AB150',      ratio:'40:1',  tNm:150,  inp:16,  ma:9.6,  stemH:38},
-      {m:'AB210',      ratio:'37:1',  tNm:330,  inp:28.5,ma:11.6, stemH:45},
-      {m:'AB215',      ratio:'37:1',  tNm:500,  inp:43,  ma:11.6, stemH:45},
-      {m:'AB550',      ratio:'34:1',  tNm:1000, inp:83,  ma:12,   stemH:79},
-      {m:'AB880',      ratio:'38:1',  tNm:2000, inp:152, ma:13.2, stemH:82},
-      {m:'AB1250',     ratio:'55:1',  tNm:3250, inp:171, ma:19,   stemH:91},
-      {m:'AB1950',     ratio:'52:1',  tNm:5500, inp:289, ma:19,   stemH:111},
-      {m:'AB1950/SP4', ratio:'208:1', tNm:6800, inp:125, ma:54.4, stemH:111},
-      {m:'AB6800',     ratio:'78:1',  tNm:8400, inp:305, ma:27.5, stemH:121},
-      {m:'AB6800/SP4', ratio:'312:1', tNm:12500,inp:134, ma:93.6, stemH:121},
-      {m:'AB6800/SP6', ratio:'468:1', tNm:17000,inp:122, ma:140,  stemH:121},
-      {m:'A200/SP9',   ratio:'705:1', tNm:26000,inp:142, ma:183,  stemH:169},
-      {m:'A250/SP9',   ratio:'705:1', tNm:32000,inp:166, ma:193,  stemH:169},
-    ]
+  /* ── AB-PS ── (same gearbox, PS handwheel) */
+  {id:'AB-PS',series:'AB Series (PS Handwheel)',type:'Worm Gear (Part-turn)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Damper','Any'],specials:[],
+   torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (A250/SP9)',
+   outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
+   hwTypes:['PS'],hwDesc:'PS compact post-style \u2014 corrosive, marine, offshore.',
+   env:'Corrosive / Marine / Confined Space',
+   notes:'Cast iron worm gearbox with PS handwheel. IP67/IP68 available. Same torque range as SG variant.',
+   models:[
+     {m:'AB150',      ratio:'40:1', tNm:150,  inp:16,  ma:9.6,  stemH:38,  maxBoreMm:18,  maxSqAFMm:null,maxStemHMm:38,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB210',      ratio:'37:1', tNm:330,  inp:28.5,ma:11.6, stemH:45,  maxBoreMm:25,  maxSqAFMm:null,maxStemHMm:45,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB215',      ratio:'37:1', tNm:500,  inp:43,  ma:11.6, stemH:45,  maxBoreMm:32,  maxSqAFMm:null,maxStemHMm:45,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB550',      ratio:'34:1', tNm:1000, inp:83,  ma:12,   stemH:79,  maxBoreMm:45,  maxSqAFMm:null,maxStemHMm:79,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB880',      ratio:'38:1', tNm:2000, inp:152, ma:13.2, stemH:82,  maxBoreMm:60,  maxSqAFMm:null,maxStemHMm:82,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB1250',     ratio:'55:1', tNm:3250, inp:171, ma:19,   stemH:91,  maxBoreMm:60,  maxSqAFMm:null,maxStemHMm:91,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB1950',     ratio:'52:1', tNm:5500, inp:289, ma:19,   stemH:111, maxBoreMm:75,  maxSqAFMm:null,maxStemHMm:111, driveOptions:['square','keyed','round','dd']},
+     {m:'AB1950/SP4', ratio:'208:1',tNm:6800, inp:125, ma:54.4, stemH:111, maxBoreMm:75,  maxSqAFMm:null,maxStemHMm:111, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800',     ratio:'78:1', tNm:8400, inp:305, ma:27.5, stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800/SP4', ratio:'312:1',tNm:12500,inp:134, ma:93.6, stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800/SP6', ratio:'468:1',tNm:17000,inp:122, ma:140,  stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'A200/SP9',   ratio:'705:1',tNm:26000,inp:142, ma:183,  stemH:169, maxBoreMm:150, maxSqAFMm:null,maxStemHMm:169, driveOptions:['square','keyed','round','dd']},
+     {m:'A250/SP9',   ratio:'705:1',tNm:32000,inp:166, ma:193,  stemH:169, maxBoreMm:150, maxSqAFMm:null,maxStemHMm:169, driveOptions:['square','keyed','round','dd']},
+   ]
   },
-  {
-    id:'AB-SS',series:'AB-SS (Stainless Steel)',type:'Worm Gear (Part-turn)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Damper','Any'],specials:[],
-    torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (A250/SP9)',
-    outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
-    hwTypes:['SS'],hwDesc:'SS stainless steel handwheel \u2014 aggressive corrosive, offshore, hygienic, or chemical environments.',
-    env:'Corrosive / Offshore / Hygienic',
-    notes:'Stainless steel construction variant of AB series with SS stainless handwheel. For aggressive corrosive, offshore, food-grade, or hygienic environments. Same torque range as standard AB.',
-    models:[
-      {m:'AB210',      ratio:'37:1',  tNm:330,  inp:28.5,ma:11.6, stemH:45},
-      {m:'AB215',      ratio:'37:1',  tNm:500,  inp:43,  ma:11.6, stemH:45},
-      {m:'AB550',      ratio:'34:1',  tNm:1000, inp:83,  ma:12,   stemH:79},
-      {m:'AB880',      ratio:'38:1',  tNm:2000, inp:152, ma:13.2, stemH:82},
-      {m:'AB1250',     ratio:'55:1',  tNm:3250, inp:171, ma:19,   stemH:91},
-      {m:'AB1950',     ratio:'52:1',  tNm:5500, inp:289, ma:19,   stemH:111},
-      {m:'AB1950/SP4', ratio:'208:1', tNm:6800, inp:125, ma:54.4, stemH:111},
-      {m:'AB6800',     ratio:'78:1',  tNm:8400, inp:305, ma:27.5, stemH:121},
-      {m:'AB6800/SP4', ratio:'312:1', tNm:12500,inp:134, ma:93.6, stemH:121},
-      {m:'AB6800/SP6', ratio:'468:1', tNm:17000,inp:122, ma:140,  stemH:121},
-      {m:'A200/SP9',   ratio:'705:1', tNm:26000,inp:142, ma:183,  stemH:169},
-      {m:'A250/SP9',   ratio:'705:1', tNm:32000,inp:166, ma:193,  stemH:169},
-    ]
+  /* ── AB-SS ── */
+  {id:'AB-SS',series:'AB-SS (Stainless Steel)',type:'Worm Gear (Part-turn)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Damper','Any'],specials:[],
+   torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm',
+   outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
+   hwTypes:['SS'],hwDesc:'SS stainless handwheel \u2014 corrosive, offshore, hygienic.',
+   env:'Corrosive / Offshore / Hygienic',
+   notes:'Stainless steel variant of AB series. Same torque range.',
+   models:[
+     {m:'AB210',      ratio:'37:1', tNm:330,  inp:28.5,ma:11.6, stemH:45,  maxBoreMm:25,  maxSqAFMm:null,maxStemHMm:45,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB215',      ratio:'37:1', tNm:500,  inp:43,  ma:11.6, stemH:45,  maxBoreMm:32,  maxSqAFMm:null,maxStemHMm:45,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB550',      ratio:'34:1', tNm:1000, inp:83,  ma:12,   stemH:79,  maxBoreMm:45,  maxSqAFMm:null,maxStemHMm:79,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB880',      ratio:'38:1', tNm:2000, inp:152, ma:13.2, stemH:82,  maxBoreMm:60,  maxSqAFMm:null,maxStemHMm:82,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB1250',     ratio:'55:1', tNm:3250, inp:171, ma:19,   stemH:91,  maxBoreMm:60,  maxSqAFMm:null,maxStemHMm:91,  driveOptions:['square','keyed','round','dd']},
+     {m:'AB1950',     ratio:'52:1', tNm:5500, inp:289, ma:19,   stemH:111, maxBoreMm:75,  maxSqAFMm:null,maxStemHMm:111, driveOptions:['square','keyed','round','dd']},
+     {m:'AB1950/SP4', ratio:'208:1',tNm:6800, inp:125, ma:54.4, stemH:111, maxBoreMm:75,  maxSqAFMm:null,maxStemHMm:111, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800',     ratio:'78:1', tNm:8400, inp:305, ma:27.5, stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'AB6800/SP6', ratio:'468:1',tNm:17000,inp:122, ma:140,  stemH:121, maxBoreMm:100, maxSqAFMm:null,maxStemHMm:121, driveOptions:['square','keyed','round','dd']},
+     {m:'A200/SP9',   ratio:'705:1',tNm:26000,inp:142, ma:183,  stemH:169, maxBoreMm:150, maxSqAFMm:null,maxStemHMm:169, driveOptions:['square','keyed','round','dd']},
+     {m:'A250/SP9',   ratio:'705:1',tNm:32000,inp:166, ma:193,  stemH:169, maxBoreMm:150, maxSqAFMm:null,maxStemHMm:169, driveOptions:['square','keyed','round','dd']},
+   ]
   },
-  {
-    id:'ILG-S',series:'ILG-S Series',type:'Worm Gear (Part-turn, Sandwich)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Any'],specials:['spring-return'],
-    torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (ILG-S 250/SP9)',
-    outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
-    hwTypes:['SG','PS'],hwDesc:'SG or PS handwheel available. SG for general environments; PS for corrosive/marine.',
-    env:'Industrial \u2014 Spring Return (Single-Acting) Actuators',
-    notes:'Sandwich manual override for single-acting spring-return pneumatic or electric actuators. Optimized for asymmetric BTO/BTC torque profiles. Mounts between valve and actuator. 11 models, IP65 standard.',
-    models:[
-      {m:'ILG-S 210',      ratio:'37:1',  tNm:330,   inp:28.5,ma:11.6},
-      {m:'ILG-S 550',      ratio:'34:1',  tNm:934,   inp:78,  ma:12},
-      {m:'ILG-S 880',      ratio:'38:1',  tNm:1620,  inp:123, ma:13.2},
-      {m:'ILG-S 1250',     ratio:'55:1',  tNm:2640,  inp:139, ma:19},
-      {m:'ILG-S 1950',     ratio:'52:1',  tNm:3050,  inp:160, ma:19},
-      {m:'ILG-S 1950/SP4', ratio:'208:1', tNm:6800,  inp:103, ma:54.4},
-      {m:'ILG-S 6800',     ratio:'78:1',  tNm:4400,  inp:160, ma:27.5},
-      {m:'ILG-S 6800/SP4', ratio:'312:1', tNm:12500, inp:134, ma:93.6},
-      {m:'ILG-S 6800/SP6', ratio:'468:1', tNm:17000, inp:108, ma:157},
-      {m:'ILG-S 200/SP9',  ratio:'705:1', tNm:26000, inp:166, ma:157},
-      {m:'ILG-S 250/SP9',  ratio:'705:1', tNm:32000, inp:142, ma:225},
-    ]
+  /* ── ILG-S ── */
+  {id:'ILG-S',series:'ILG-S Series',type:'Worm Gear (Part-turn, Sandwich)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Any'],specials:['spring-return'],
+   torqueMaxNm:32000,torqueNote:'Up to 32,000 Nm (ILG-S 250/SP9)',
+   outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30','FA35','FA40'],
+   hwTypes:['SG','PS'],hwDesc:'SG or PS handwheel available.',
+   env:'Industrial \u2014 Spring Return (Single-Acting)',
+   notes:'Sandwich manual override for spring-return actuators. 11 models, IP65 standard.',
+   models:[
+     {m:'ILG-S 210',      ratio:'37:1', tNm:330,  inp:28.5,ma:11.6,maxBoreMm:25, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 550',      ratio:'34:1', tNm:934,  inp:78,  ma:12,  maxBoreMm:45, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 880',      ratio:'38:1', tNm:1620, inp:123, ma:13.2,maxBoreMm:60, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 1250',     ratio:'55:1', tNm:2640, inp:139, ma:19,  maxBoreMm:60, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 1950',     ratio:'52:1', tNm:3050, inp:160, ma:19,  maxBoreMm:75, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 1950/SP4', ratio:'208:1',tNm:6800, inp:103, ma:54.4,maxBoreMm:75, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 6800',     ratio:'78:1', tNm:4400, inp:160, ma:27.5,maxBoreMm:100,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 6800/SP4', ratio:'312:1',tNm:12500,inp:134, ma:93.6,maxBoreMm:100,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 6800/SP6', ratio:'468:1',tNm:17000,inp:108, ma:157, maxBoreMm:100,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 200/SP9',  ratio:'705:1',tNm:26000,inp:166, ma:157, maxBoreMm:150,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-S 250/SP9',  ratio:'705:1',tNm:32000,inp:142, ma:225, maxBoreMm:150,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+   ]
   },
-  {
-    id:'ILG-D',series:'ILG-D Series',type:'Worm Gear (Part-turn, Declutchable)',turn:'Part-turn',
-    valves:['Butterfly','Ball','Plug','Any'],specials:['declutch'],
-    torqueMaxNm:17000,torqueNote:'Up to 17,000 Nm (ILG-D 16000/PR6)',
-    outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30'],
-    hwTypes:['SG','PS'],hwDesc:'SG or PS handwheel available. SG for general environments; PS for corrosive/marine.',
-    env:'Industrial \u2014 Double-Acting Pneumatic Actuators',
-    notes:'Declutchable sandwich manual override for double-acting pneumatic actuators. Mounts between valve and actuator. Declutch mechanism disengages for automatic operation. Optional 3/2 relief valve. 9 models, IP65 standard.',
-    models:[
-      {m:'ILG-D 100',       ratio:'40:1',  tNm:150,  inp:13,  ma:11},
-      {m:'ILG-D 200',       ratio:'35:1',  tNm:250,  inp:26,  ma:9.5},
-      {m:'ILG-D 600',       ratio:'46:1',  tNm:750,  inp:60,  ma:12.4},
-      {m:'ILG-D 900',       ratio:'43:1',  tNm:1450, inp:125, ma:11.6},
-      {m:'ILG-D 1500',      ratio:'57:1',  tNm:2485, inp:160, ma:15.4},
-      {m:'ILG-D 2400',      ratio:'68:1',  tNm:3390, inp:188, ma:18},
-      {m:'ILG-D 5000',      ratio:'104:1', tNm:7450, inp:298, ma:25},
-      {m:'ILG-D 8000/PR3',  ratio:'312:1', tNm:8135, inp:120, ma:68},
-      {m:'ILG-D 16000/PR6', ratio:'468:1', tNm:17000,inp:140, ma:121},
-    ]
+  /* ── ILG-D ── */
+  {id:'ILG-D',series:'ILG-D Series',type:'Worm Gear (Part-turn, Declutchable)',turn:'Part-turn',
+   valves:['Butterfly','Ball','Plug','Any'],specials:['declutch'],
+   torqueMaxNm:17000,torqueNote:'Up to 17,000 Nm (ILG-D 16000/PR6)',
+   outFlanges:['FA05','FA07','FA10','FA12','FA14','FA16','FA25','FA30'],
+   hwTypes:['SG','PS'],hwDesc:'SG or PS handwheel available.',
+   env:'Industrial \u2014 Double-Acting Pneumatic',
+   notes:'Declutchable sandwich for double-acting pneumatic actuators. 9 models, IP65 standard.',
+   models:[
+     {m:'ILG-D 100',       ratio:'40:1', tNm:150,  inp:13,  ma:11,  maxBoreMm:16, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 200',       ratio:'35:1', tNm:250,  inp:26,  ma:9.5, maxBoreMm:22, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 600',       ratio:'46:1', tNm:750,  inp:60,  ma:12.4,maxBoreMm:30, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 900',       ratio:'43:1', tNm:1450, inp:125, ma:11.6,maxBoreMm:44, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 1500',      ratio:'57:1', tNm:2485, inp:160, ma:15.4,maxBoreMm:60, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 2400',      ratio:'68:1', tNm:3390, inp:188, ma:18,  maxBoreMm:75, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 5000',      ratio:'104:1',tNm:7450, inp:298, ma:25,  maxBoreMm:95, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 8000/PR3',  ratio:'312:1',tNm:8135, inp:120, ma:68,  maxBoreMm:95, maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+     {m:'ILG-D 16000/PR6', ratio:'468:1',tNm:17000,inp:140, ma:121, maxBoreMm:140,maxSqAFMm:null,maxStemHMm:null,driveOptions:['square','keyed','round','dd']},
+   ]
   },
 ];
 
-var SPECIAL_META={
-  'declutch':      {label:'Declutch',      note:'For double-acting pneumatic actuators requiring manual override without actuator removal.'},
-  'spring-return': {label:'Spring Return', note:'For single-acting spring-return actuators \u2014 optimized for asymmetric BTO/BTC torque profiles.'},
-};
-
+/* ISO 5211 flange data — used for flange compatibility check */
 var FLANGE_ISO=[
-  {t:'F05',maxNm:125,  d2:35, pcd:50,  bolt:'M6', n:4},
-  {t:'F07',maxNm:250,  d2:55, pcd:70,  bolt:'M8', n:4},
-  {t:'F10',maxNm:500,  d2:70, pcd:102, bolt:'M10',n:4},
-  {t:'F12',maxNm:1000, d2:85, pcd:125, bolt:'M12',n:4},
-  {t:'F14',maxNm:2000, d2:100,pcd:140, bolt:'M16',n:4},
-  {t:'F16',maxNm:4000, d2:130,pcd:165, bolt:'M20',n:4},
-  {t:'F25',maxNm:8000, d2:200,pcd:254, bolt:'M16',n:8},
-  {t:'F30',maxNm:16000,d2:230,pcd:298, bolt:'M20',n:8},
-  {t:'F35',maxNm:32000,d2:260,pcd:356, bolt:'M30',n:8},
-  {t:'F40',maxNm:63000,d2:300,pcd:406, bolt:'M36',n:8},
-  {t:'F48',maxNm:125000,d2:370,pcd:483,bolt:'M36',n:12},
-  {t:'F60',maxNm:250000,d2:470,pcd:603,bolt:'M36',n:20},
+  {t:'F05',maxNm:125,  pcd:50,  d2:35, bolt:'M6', n:4},
+  {t:'F07',maxNm:250,  pcd:70,  d2:55, bolt:'M8', n:4},
+  {t:'F10',maxNm:500,  pcd:102, d2:70, bolt:'M10',n:4},
+  {t:'F12',maxNm:1000, pcd:125, d2:85, bolt:'M12',n:4},
+  {t:'F14',maxNm:2000, pcd:140, d2:100,bolt:'M16',n:4},
+  {t:'F16',maxNm:4000, pcd:165, d2:130,bolt:'M20',n:4},
+  {t:'F25',maxNm:8000, pcd:254, d2:200,bolt:'M16',n:8},
+  {t:'F30',maxNm:16000,pcd:298, d2:230,bolt:'M20',n:8},
+  {t:'F35',maxNm:32000,pcd:356, d2:260,bolt:'M30',n:8},
+  {t:'F40',maxNm:63000,pcd:406, d2:300,bolt:'M36',n:8},
+  {t:'F48',maxNm:125000,pcd:483,d2:370,bolt:'M36',n:12},
+  {t:'F60',maxNm:250000,pcd:603,d2:470,bolt:'M36',n:20},
 ];
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════ */
 var selValve='any', selTurn='any', selSpecial='none', torqueNm=null, hwCtx=null, lastRes=[];
+var compatUnit='mm'; // 'mm' or 'in'
 
-// ── VALVE CHIP (drives turn type) ─────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   PAGE TABS
+════════════════════════════════════════════════════════════ */
+function showPage(id, tabEl){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  document.getElementById('page-'+id).classList.add('on');
+  tabEl.classList.add('on');
+  // When switching to the compat tab, auto-import from the selector if something is selected
+  if(id==='compat') importFromSelector(null, null, true);
+}
+
+/* ════════════════════════════════════════════════════════════
+   CONFIGURATOR — VALVE CHIPS + TURN TYPE
+════════════════════════════════════════════════════════════ */
 function pickValve(el){
   document.querySelectorAll('#vchips .vchip').forEach(function(c){c.classList.remove('on');});
   el.classList.add('on');
   selValve=el.dataset.val;
-  selTurn=el.dataset.turn; // 'any', 'Part-turn', or 'Multi-turn'
-  updatePill();
-}
-
-function updatePill(){
+  selTurn=el.dataset.turn;
   var pill=document.getElementById('turn-pill');
   pill.className='turn-pill';
-  var label='Turn type: All';
-  if(selTurn==='Part-turn'){pill.classList.add('part');label='Turn type: Part-turn (Quarter-turn)';}
-  else if(selTurn==='Multi-turn'){pill.classList.add('multi');label='Turn type: Multi-turn';}
-  pill.querySelector('.pill-label').textContent=label;
+  var lbl='Turn type: All';
+  if(selTurn==='Part-turn'){pill.classList.add('part');lbl='Turn type: Part-turn (Quarter-turn)';}
+  else if(selTurn==='Multi-turn'){pill.classList.add('multi');lbl='Turn type: Multi-turn';}
+  pill.querySelector('.lbl').textContent=lbl;
 }
-
-// ── SPECIAL ───────────────────────────────────────────────────────────────────
 function pickSp(el){
   document.querySelectorAll('#spchips .chip').forEach(function(c){c.classList.remove('on');});
   el.classList.add('on');
   selSpecial=el.dataset.val;
 }
 
-// ── TORQUE ────────────────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   TORQUE + TC
+════════════════════════════════════════════════════════════ */
 function toNm(v,u){if(u==='Nm')return v;if(u==='ftlb')return v*1.35582;if(u==='inlb')return v/8.85075;return v;}
 function updateNm(){
   var v=parseFloat(document.getElementById('tval').value);
   var u=document.getElementById('tunit').value;
-  if(isNaN(v)||v<=0){
-    torqueNm=null;document.getElementById('nmdisp').textContent='\u2014 Nm';
-    document.getElementById('tcv').value='';calcTC();return;
-  }
+  if(isNaN(v)||v<=0){torqueNm=null;document.getElementById('nmdisp').textContent='\u2014 Nm';
+    document.getElementById('tcv').value='';calcTC();return;}
   torqueNm=toNm(v,u);
   document.getElementById('nmdisp').textContent=torqueNm.toLocaleString('en-US',{maximumFractionDigits:1})+' Nm';
   document.getElementById('tcv').value=v;document.getElementById('tcu').value=u;
   var ts=document.getElementById('tct');if(!ts.dataset.us)ts.value=(u==='Nm')?'ftlb':'Nm';
   calcTC();
 }
+function tcNm(v,u){if(u==='Nm')return v;if(u==='ftlb')return v*1.35582;if(u==='inlb')return v/8.85075;if(u==='kNm')return v*1000;return v;}
+function nmTo(nm,u){if(u==='Nm')return nm;if(u==='ftlb')return nm*0.73756;if(u==='inlb')return nm*8.85075;if(u==='kNm')return nm/1000;return nm;}
+function fmt(v,u){return v.toLocaleString('en-US',{maximumFractionDigits:u==='kNm'?3:1});}
+function ul(u){return{Nm:'Nm',ftlb:'ft-lb',inlb:'in-lb',kNm:'kN\u00b7m'}[u]||u;}
+function calcTC(){
+  var v=parseFloat(document.getElementById('tcv').value);
+  var fu=document.getElementById('tcu').value, tu=document.getElementById('tct').value;
+  var cells=document.querySelectorAll('#tcgrid .tci .v');
+  var line=document.getElementById('tcline');
+  if(isNaN(v)){cells.forEach(function(c){c.textContent='\u2014';});line.innerHTML='<span style="color:var(--muted)">\u2014</span>';return;}
+  var nm=tcNm(v,fu),tv=nmTo(nm,tu);
+  line.innerHTML='<span style="color:var(--muted)">Result:</span> <span class="v">'+fmt(v,fu)+' '+ul(fu)+'</span><span style="color:var(--muted)'+'"> = </span><span class="v">'+fmt(tv,tu)+' '+ul(tu)+'</span>';
+  ['Nm','ftlb','inlb','kNm'].forEach(function(u,i){cells[i].textContent=fmt(nmTo(nm,u),u);});
+}
 
-// ── HANDWHEEL ─────────────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   HANDWHEEL
+════════════════════════════════════════════════════════════ */
 function setHW(gbId,modelName){
   var gb=GB.find(function(g){return g.id===gbId;});if(!gb)return;
   var m=gb.models.find(function(x){return x.m===modelName;});if(!m)return;
@@ -629,73 +1010,50 @@ function calcHW(){
   var box=document.getElementById('hwbox');
   var rpN=parseFloat(document.getElementById('hwrp').value)||360;
   if(!hwCtx){box.innerHTML='<span class="warn">Select a model via \u201cUse HW\u201d in the detail view.</span>';return;}
-  if(!hwCtx.ma){
-    box.innerHTML='<div class="ctx">'+hwCtx.series+' \u2014 '+hwCtx.model+'</div><span class="warn">M.A. not available for this model.</span>';return;
-  }
-  var inpNm=hwCtx.tNm/hwCtx.ma;
-  var diam_mm=(inpNm*2000)/rpN;
-  var html='<div class="ctx">'+hwCtx.series+' \u2014 '+hwCtx.model+'</div>';
-  html+='<span style="color:var(--muted)">Output Torque:</span> <span class="v">'+hwCtx.tNm.toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span><br>';
-  html+='<span style="color:var(--muted)">M.A.:</span> <span class="v">'+hwCtx.ma+'</span><br>';
-  html+='<span style="color:var(--muted)">Input Torque:</span> <span class="v">'+inpNm.toFixed(1)+' Nm</span><br>';
-  html+='<span style="color:var(--muted)">Rim Pull:</span> <span class="v">'+rpN+' N ('+Math.round(rpN/4.448)+' lbs)</span><br>';
-  html+='<span style="color:var(--muted)">Required \u00d8:</span> <span class="v">'+Math.round(diam_mm)+' mm ('+(diam_mm/25.4).toFixed(1)+'\")</span>';
+  if(!hwCtx.ma){box.innerHTML='<div class="ctx">'+hwCtx.series+' \u2014 '+hwCtx.model+'</div><span class="warn">M.A. not available for this model.</span>';return;}
+  var inpNm=hwCtx.tNm/hwCtx.ma, diam_mm=(inpNm*2000)/rpN;
+  var h='<div class="ctx">'+hwCtx.series+' \u2014 '+hwCtx.model+'</div>';
+  h+='<span style="color:var(--muted)">Output Torque:</span> <span class="v">'+hwCtx.tNm.toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span><br>';
+  h+='<span style="color:var(--muted)">M.A.:</span> <span class="v">'+hwCtx.ma+'</span><br>';
+  h+='<span style="color:var(--muted)">Input Torque:</span> <span class="v">'+inpNm.toFixed(1)+' Nm</span><br>';
+  h+='<span style="color:var(--muted)">Rim Pull:</span> <span class="v">'+rpN+' N ('+Math.round(rpN/4.448)+' lbs)</span><br>';
+  h+='<span style="color:var(--muted)">Required \u00d8:</span> <span class="v">'+Math.round(diam_mm)+' mm ('+(diam_mm/25.4).toFixed(1)+'\")</span>';
   if(hwCtx.hwTypes&&hwCtx.hwTypes.length){
     hwCtx.hwTypes.forEach(function(type){
       var cat=type==='SG'?HW_SG:type==='PS'?HW_PS:HW_SS;
-      html+='<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">'
-        +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;">'+type+' Series &mdash; '+HW_TYPE_DESC[type]+'</div>'
+      h+='<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">'
+        +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;">'+type+' Series \u2014 '+HW_TYPE_DESC[type]+'</div>'
         +'<table class="hwt"><thead><tr><th>Size</th><th style="text-align:right">\u00d8 mm</th><th style="text-align:right">\u00d8 in</th><th style="text-align:right">Fit?</th></tr></thead><tbody>';
       cat.forEach(function(hw){
-        var diff=Math.abs(hw.mm-diam_mm), fits=hw.mm>=diam_mm*0.9, best=diff<=25;
+        var diff=Math.abs(hw.mm-diam_mm),fits=hw.mm>=diam_mm*0.9,best=diff<=25;
         var col=best?'var(--accent)':fits?'var(--green)':'var(--muted)';
         var mark=best?'\u2605 Best':fits?'\u2713':'\u2014';
-        html+='<tr><td style="color:'+col+'">'+hw.hw+'</td><td style="color:'+col+';text-align:right">'+hw.mm+'</td>'
+        h+='<tr><td style="color:'+col+'">'+hw.hw+'</td><td style="color:'+col+';text-align:right">'+hw.mm+'</td>'
           +'<td style="color:'+col+';text-align:right">'+(hw.mm/25.4).toFixed(1)+'"</td>'
           +'<td style="color:'+col+';text-align:right">'+mark+'</td></tr>';
       });
-      html+='</tbody></table></div>';
+      h+='</tbody></table></div>';
     });
   }
-  box.innerHTML=html;
+  box.innerHTML=h;
 }
 
-// ── TORQUE CONVERTER ──────────────────────────────────────────────────────────
-function tcNm(v,u){if(u==='Nm')return v;if(u==='ftlb')return v*1.35582;if(u==='inlb')return v/8.85075;if(u==='kNm')return v*1000;return v;}
-function nmTo(nm,u){if(u==='Nm')return nm;if(u==='ftlb')return nm*0.73756;if(u==='inlb')return nm*8.85075;if(u==='kNm')return nm/1000;return nm;}
-function fmt(v,u){return v.toLocaleString('en-US',{maximumFractionDigits:u==='kNm'?3:1});}
-function ul(u){return{Nm:'Nm',ftlb:'ft-lb',inlb:'in-lb',kNm:'kN\u00b7m'}[u]||u;}
-function calcTC(){
-  var v=parseFloat(document.getElementById('tcv').value);
-  var fu=document.getElementById('tcu').value, tu=document.getElementById('tct').value;
-  var cells=document.querySelectorAll('#tcgrid .tci .v');
-  var line=document.getElementById('tcline');
-  if(isNaN(v)){cells.forEach(function(c){c.textContent='\u2014';});line.innerHTML='<span style="color:var(--muted)">\u2014</span>';return;}
-  var nm=tcNm(v,fu), tv=nmTo(nm,tu);
-  line.innerHTML='<span style="color:var(--muted)">Result:</span> <span class="v">'+fmt(v,fu)+' '+ul(fu)+'</span><span style="color:var(--muted)'+'"> = </span><span class="v">'+fmt(tv,tu)+' '+ul(tu)+'</span>';
-  ['Nm','ftlb','inlb','kNm'].forEach(function(u,i){cells[i].textContent=fmt(nmTo(nm,u),u);});
-}
-
-// ── FLANGE MATCHING ───────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   FLANGE + VALVE MATCHING (configurator)
+════════════════════════════════════════════════════════════ */
 function pf(code){
   if(!code)return{fam:'UNK',key:''};
   var c=String(code).toUpperCase().trim();
-  if(c==='ANY')return{fam:'ANY',key:'ANY'};
   var mF=c.match(/^F(\d+)$/),mFA=c.match(/^FA(\d+)$/);
   if(mF){var n=parseInt(mF[1],10);return n<100?{fam:'ISO',key:String(n)}:{fam:'ISF',key:String(n)};}
-  if(mFA){return{fam:'ISO',key:String(parseInt(mFA[1],10))};}
+  if(mFA)return{fam:'ISO',key:String(parseInt(mFA[1],10))};
   return{fam:'RAW',key:c};
 }
 function flangeOK(gbFlanges,req){
   if(!req||req==='any')return true;
   if(!gbFlanges||!gbFlanges.length)return false;
   var r=pf(req);
-  return gbFlanges.some(function(f){
-    var g=pf(f);
-    if(r.fam===g.fam)return r.key===g.key;
-    if(r.fam==='RAW'||g.fam==='RAW')return String(f).toUpperCase().trim()===String(req).toUpperCase().trim();
-    return false;
-  });
+  return gbFlanges.some(function(f){var g=pf(f);if(r.fam===g.fam)return r.key===g.key;return false;});
 }
 function valveOK(gbV,req){
   if(req==='any')return true;
@@ -708,15 +1066,19 @@ function gbRange(gb){
   return{min:Math.min.apply(null,tqs),max:Math.max.apply(null,tqs)};
 }
 
-// ── RUN ───────────────────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   CONFIGURATOR — RUN + RENDER
+════════════════════════════════════════════════════════════ */
+var SPECIAL_META={
+  'declutch':      {label:'Declutch',      note:'For double-acting pneumatic actuators requiring manual override without actuator removal.'},
+  'spring-return': {label:'Spring Return', note:'For single-acting spring-return actuators \u2014 optimized for asymmetric BTO/BTC torque profiles.'},
+};
 function run(){
   var flangeReq=document.getElementById('vflange').value;
   var res=[];
   GB.forEach(function(gb){
-    // Turn type filter — derived from valve selection
     if(selTurn!=='any'&&gb.turn!==selTurn)return;
     if(!valveOK(gb.valves,selValve))return;
-    // Special requirement
     if(selSpecial!=='none'){
       var sup=gb.specials&&gb.specials.indexOf(selSpecial)>=0;
       var agn=!gb.specials||gb.specials.length===0;
@@ -725,156 +1087,711 @@ function run(){
     var range=gbRange(gb);
     if(torqueNm&&torqueNm>range.max*1.05)return;
     if(flangeReq!=='any'&&!flangeOK(gb.outFlanges,flangeReq))return;
-
-    var mm=gb.models?gb.models.filter(function(m){
-      if(!torqueNm)return true;
-      return mTq(m)>=torqueNm*0.95;
-    }):[];
+    var mm=gb.models?gb.models.filter(function(m){if(!torqueNm)return true;return mTq(m)>=torqueNm*0.95;}):[];
     if(torqueNm&&mm.length===0&&gb.models)mm=gb.models.slice(-3);
-
     var isSpec=selSpecial!=='none'&&gb.specials&&gb.specials.indexOf(selSpecial)>=0;
     res.push({gb:gb,mm:mm,range:range,isSpec:isSpec});
   });
-
-  // Sort: special match first → smallest first-qualifying model (tightest fit)
   res.sort(function(a,b){
     if(a.isSpec!==b.isSpec)return a.isSpec?-1:1;
     if(!torqueNm)return 0;
-    var ao=Math.max(0,torqueNm-a.range.max), bo=Math.max(0,torqueNm-b.range.max);
+    var ao=Math.max(0,torqueNm-a.range.max),bo=Math.max(0,torqueNm-b.range.max);
     if(ao!==bo)return ao-bo;
-    var af=a.mm[0]?mTq(a.mm[0]):a.range.max;
-    var bf=b.mm[0]?mTq(b.mm[0]):b.range.max;
+    var af=a.mm[0]?mTq(a.mm[0]):a.range.max,bf=b.mm[0]?mTq(b.mm[0]):b.range.max;
     return af-bf;
   });
-
   lastRes=res;
   renderRes(res);
 }
-
-// ── RENDER ────────────────────────────────────────────────────────────────────
 function renderRes(res){
   var p=document.getElementById('right');
   if(!res.length){
-    p.innerHTML='<div class="empty"><div class="ico">\uD83D\uDD0D</div><h2>No Matches Found</h2><p>Try relaxing your criteria \u2014 adjust flange, torque, or valve type.</p></div>';
-    return;
+    p.innerHTML='<div class="empty"><div class="ico">\uD83D\uDD0D</div><h2>No Matches Found</h2><p>Try relaxing your criteria.</p></div>';return;
   }
-  var h='<div class="rh"><span class="rt">Matching Gearbox Series</span><span class="rc">'+res.length+' series found</span></div><div class="grid">';
+  var h='<div class="rh"><span class="rt">Matching Gearbox Series</span><span class="rc">'+res.length+' found</span></div><div class="grid">';
   res.forEach(function(r,i){
-    var gb=r.gb, rng=r.range;
+    var gb=r.gb,rng=r.range;
     var isBest=i===0&&(torqueNm||selSpecial!=='none');
     var bp=torqueNm?Math.min(100,Math.round((torqueNm/rng.max)*100)):0;
     var bc=bp<60?'var(--green)':bp<85?'var(--yellow)':'var(--accent)';
-
     var bdg=isBest?'<span class="badge bst">Best Match</span>':'<span class="badge mat">Match</span>';
     if(r.isSpec)bdg+='<span class="badge spc">'+SPECIAL_META[selSpecial].label+'</span>';
     if(gb.hwTypes&&gb.hwTypes.length)bdg+='<span class="badge hw">'+gb.hwTypes.join('/')+'</span>';
-
-    var fm=r.mm[0], mrow='';
-    if(fm){
-      mrow='<div class="crow"><span class="cl">Smallest Qualifying</span><span class="cv hi">'+fm.m+'</span></div>'
-          +'<div class="crow"><span class="cl">Model Capacity</span><span class="cv">'+mTq(fm).toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span></div>';
-    }
+    var fm=r.mm[0],mrow='';
+    if(fm)mrow='<div class="crow"><span class="cl">Smallest Qualifying</span><span class="cv hi">'+fm.m+'</span></div>'
+               +'<div class="crow"><span class="cl">Model Capacity</span><span class="cv">'+mTq(fm).toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span></div>';
     var barh=torqueNm?'<div class="bar"><div class="barl"><span>Required: '+torqueNm.toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span><span>Max: '+rng.max.toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span></div><div class="bart"><div class="barf" style="width:'+bp+'%;background:'+bc+'"></div></div></div>':'';
     var spnh=r.isSpec?'<div class="spn">\u26a1 '+SPECIAL_META[selSpecial].note+'</div>':'';
-
     h+='<div class="card'+(isBest?' best':'')+'" onclick="showDet('+i+')">'
       +'<div class="ch"><div><div class="cs">'+gb.series+'</div><div class="ct">'+gb.type+'</div></div>'
       +'<div class="cba">'+bdg+'</div></div>'
-      +'<div class="cb">'
-      +'<div class="crow"><span class="cl">Torque Range</span><span class="cv">'+rng.min.toLocaleString('en-US',{maximumFractionDigits:0})+'\u2013'+rng.max.toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span></div>'
+      +'<div class="cb"><div class="crow"><span class="cl">Torque Range</span><span class="cv">'+rng.min.toLocaleString('en-US',{maximumFractionDigits:0})+'\u2013'+rng.max.toLocaleString('en-US',{maximumFractionDigits:0})+' Nm</span></div>'
       +'<div class="crow"><span class="cl">Environment</span><span class="cv">'+gb.env+'</span></div>'
-      +mrow+barh+spnh
-      +'<div class="cn">'+gb.notes+'</div>'
-      +'</div></div>';
+      +mrow+barh+spnh+'<div class="cn">'+gb.notes+'</div></div></div>';
   });
   h+='</div><div class="det" id="det"></div>';
   p.innerHTML=h;
 }
-
-// ── DETAIL ────────────────────────────────────────────────────────────────────
 function showDet(ri){
   var r=lastRes[ri];if(!r)return;
-  var gb=r.gb, matchIds=r.mm.map(function(m){return m.m;});
+  var gb=r.gb,matchIds=r.mm.map(function(m){return m.m;});
   var det=document.getElementById('det');
   det.classList.add('open');
   det.scrollIntoView({behavior:'smooth',block:'nearest'});
-
   var stags=(gb.specials||[]).map(function(s){return SPECIAL_META[s]?'<span class="badge spc">'+SPECIAL_META[s].label+'</span>':'';}).join('');
-
-  // Model table
   var modH='';
   if(gb.models&&gb.models.length){
     var m0=gb.models[0];
     var cols=[
-      {hd:'Model',       fn:function(m){return m.m;}},
-      {hd:'Ratio',       fn:function(m){return m.ratio!=null?m.ratio:'\u2014';}, on:m0.ratio!==undefined},
-      {hd:'Output (Nm)', fn:function(m){return m.tNm?m.tNm.toLocaleString('en-US'):'\u2014';}},
-      {hd:'Input (Nm)',  fn:function(m){return m.inp!=null?m.inp.toFixed(1):'\u2014';}, on:m0.inp!==undefined},
-      {hd:'M.A. \u00b115%',fn:function(m){return m.ma!=null?m.ma:'\u2014';}, on:m0.ma!==undefined},
-      {hd:'Input Flange',fn:function(m){return m.iF||'\u2014';}, on:m0.iF!==undefined},
-      {hd:'Output Flange',fn:function(m){return m.oF||'\u2014';}, on:m0.oF!==undefined},
-      {hd:'Thrust (klb)',fn:function(m){return m.thrklb!=null?m.thrklb:'\u2014';}, on:m0.thrklb!==undefined},
-      {hd:'Stem H (mm)', fn:function(m){return m.stemH!=null?m.stemH:'\u2014';}, on:m0.stemH!==undefined},
+      {hd:'Model',fn:function(m){return m.m;}},
+      {hd:'Ratio',fn:function(m){return m.ratio!=null?m.ratio:'\u2014';},on:m0.ratio!==undefined},
+      {hd:'Output (Nm)',fn:function(m){return m.tNm?m.tNm.toLocaleString('en-US'):'\u2014';}},
+      {hd:'Input (Nm)',fn:function(m){return m.inp!=null?m.inp.toFixed(1):'\u2014';},on:m0.inp!==undefined},
+      {hd:'M.A. \u00b115%',fn:function(m){return m.ma!=null?m.ma:'\u2014';},on:m0.ma!==undefined},
+      {hd:'Max Bore (mm)',fn:function(m){return m.maxBoreMm||'\u2014';},on:true},
+      {hd:'Stem H (mm)',fn:function(m){return m.maxStemHMm||'\u2014';},on:m0.stemH!==undefined||m0.maxStemHMm!==undefined},
     ].filter(function(c){return c.on!==false;});
-
     var th='<tr>'+cols.map(function(c){return'<th>'+c.hd+'</th>';}).join('')+'<th>HW</th></tr>';
     var tb=gb.models.map(function(m){
       var sel=matchIds.indexOf(m.m)>=0;
+      var menc=m.m.replace(/"/g,'&quot;');
       return'<tr class="'+(sel?'sel':'')+'">'+cols.map(function(c){return'<td>'+c.fn(m)+'</td>';}).join('')
-        +'<td><button style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);color:var(--accent);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:10px;font-family:\'DM Mono\',monospace;" data-gbid="'+gb.id+'" data-model="'+m.m.replace(/"/g,'&quot;')+'" onclick="useHW(this)">Use HW</button></td></tr>';
+        +'<td style="white-space:nowrap">'
+        +'<button style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);color:var(--accent);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:10px;font-family:\'DM Mono\',monospace;margin-right:4px;" data-gbid="'+gb.id+'" data-model="'+menc+'" onclick="useHW(this)">Use HW</button>'
+        +'<button style="background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.35);color:var(--teal);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:10px;font-family:\'DM Mono\',monospace;" data-gbid="'+gb.id+'" data-model="'+menc+'" onclick="useForInterface(this)" title="Import this model into the Interface &amp; Machining tab">\u2192 Interface</button>'
+        +'</td></tr>';
     }).join('');
     modH='<div class="btitle">Model Selection <span style="color:var(--accent);font-size:11px;">\u2191 highlighted = meets torque</span></div>'
         +'<div style="overflow-x:auto"><table class="dt"><thead>'+th+'</thead><tbody>'+tb+'</tbody></table></div>';
   }
-
-  // ISO flange ref
-  var isoF=FLANGE_ISO.filter(function(f){
-    return(gb.outFlanges||[]).some(function(gf){var p=pf(gf);return p.fam==='ISO'&&('F'+p.key)===f.t;});
-  });
+  var isoF=FLANGE_ISO.filter(function(f){return(gb.outFlanges||[]).some(function(gf){var p=pf(gf);return p.fam==='ISO'&&('F'+p.key)===f.t;});});
   var flangeH='';
   if(isoF.length){
     flangeH='<div class="btitle">ISO Output Flange Reference</div><div style="overflow-x:auto"><table class="dt"><thead><tr><th>Flange</th><th>Max Torque (Nm)</th><th>d2 (mm)</th><th>PCD (mm)</th><th>Bolt</th><th># Bolts</th></tr></thead><tbody>'
       +isoF.map(function(f){var ok=!torqueNm||f.maxNm>=torqueNm;return'<tr class="'+(ok?'ok':'no')+'"><td>'+f.t+'</td><td>'+f.maxNm.toLocaleString('en-US')+'</td><td>'+f.d2+'</td><td>'+f.pcd+'</td><td>'+f.bolt+'</td><td>'+f.n+'</td></tr>';}).join('')
       +'</tbody></table></div>';
   }
-
-  // HW type info
   var hwInfoH='';
   if(gb.hwTypes&&gb.hwTypes.length){
-    hwInfoH='<div class="btitle">Handwheel Top-Works Options</div>'
-      +'<div style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 14px;font-size:12px;color:var(--dim);">'
-      +(gb.hwDesc||'')+'<div style="margin-top:6px;">'
-      +gb.hwTypes.map(function(t){return'<div style="margin-top:4px;font-size:11px;"><strong style="color:var(--text)">'+t+'</strong> \u2014 '+HW_TYPE_DESC[t]+'</div>';}).join('')
-      +'</div></div>';
+    hwInfoH='<div class="btitle">Handwheel Top-Works</div>'
+      +'<div style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:10px 14px;font-size:12px;color:var(--dim);">'+(gb.hwDesc||'')+'<div style="margin-top:6px;">'
+      +gb.hwTypes.map(function(t){return'<div style="margin-top:4px;font-size:11px;"><strong style="color:var(--text)">'+t+'</strong> \u2014 '+HW_TYPE_DESC[t]+'</div>';}).join('')+'</div></div>';
   }
-
   var specCell=gb.specials&&gb.specials.length?'<div class="dc"><div class="dcl">Special Use</div><div class="dcv sp">'+gb.specials.map(function(s){return SPECIAL_META[s]?SPECIAL_META[s].label:s;}).join(', ')+'</div></div>':'';
-
   det.innerHTML='<h3><span style="color:var(--accent)">'+gb.series+'</span>\u2002Detail '+stags
     +'<button class="xbtn" onclick="document.getElementById(\'det\').classList.remove(\'open\')">\u00d7</button></h3>'
-    +'<div class="dgrid">'
-    +'<div class="dc"><div class="dcl">Gear Type</div><div class="dcv">'+gb.type+'</div></div>'
+    +'<div class="dgrid"><div class="dc"><div class="dcl">Gear Type</div><div class="dcv">'+gb.type+'</div></div>'
     +'<div class="dc"><div class="dcl">Turn Type</div><div class="dcv">'+gb.turn+'</div></div>'
     +'<div class="dc"><div class="dcl">Max Output</div><div class="dcv ac">'+gb.torqueNote+'</div></div>'
     +'<div class="dc"><div class="dcl">Valve Types</div><div class="dcv">'+gb.valves.filter(function(v){return v!=='Any';}).join(', ')+'</div></div>'
-    +'<div class="dc"><div class="dcl">Environment</div><div class="dcv">'+gb.env+'</div></div>'
-    +specCell+'</div>'
+    +'<div class="dc"><div class="dcl">Environment</div><div class="dcv">'+gb.env+'</div></div>'+specCell+'</div>'
     +'<div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6;font-style:italic;">'+gb.notes+'</div>'
     +hwInfoH+modH+flangeH;
 }
-
 function useHW(btn){
-  var gbId=btn.getAttribute('data-gbid'), model=btn.getAttribute('data-model');
+  var gbId=btn.getAttribute('data-gbid'),model=btn.getAttribute('data-model');
   setHW(gbId,model);
   btn.textContent='\u2713 Set';
-  btn.style.background='rgba(34,197,94,.2)';
-  btn.style.borderColor='rgba(34,197,94,.5)';
-  btn.style.color='var(--green)';
+  btn.style.background='rgba(34,197,94,.2)';btn.style.borderColor='rgba(34,197,94,.5)';btn.style.color='var(--green)';
 }
 
+/** Called from the → Interface button in the model table.
+    Stores the selection then switches to the compat tab. */
+function useForInterface(btn){
+  var gbId=btn.getAttribute('data-gbid');
+  var model=btn.getAttribute('data-model');
+  // Store as pending import so importFromSelector can pick it up
+  window._pendingCompatImport={gbId:gbId,modelName:model};
+  // Visual feedback on the button
+  btn.textContent='\u2713 Imported';
+  btn.style.background='rgba(34,197,94,.15)';
+  btn.style.borderColor='rgba(34,197,94,.4)';
+  btn.style.color='var(--green)';
+  // Switch to compat tab
+  var compatTab=document.querySelectorAll('.tab')[1];
+  showPage('compat', compatTab);
+}
+
+/**
+ * importFromSelector(gbId, modelName, autoMode)
+ *
+ * Populates Section 3 of the compat page from the selector results.
+ *
+ * Called in three situations:
+ *  1. User clicks "→ Interface" on a specific model row → gbId + modelName provided
+ *  2. User switches to compat tab manually → autoMode=true, use _pendingCompatImport or
+ *     fall back to the Best Match (first result, first qualifying model)
+ *  3. User clicks "Re-import from Selector" banner button
+ *
+ * After populating, it also mirrors:
+ *  - The valve ISO flange chosen in the selector → flangeSize dropdown
+ *  - Displays a dismissable import banner at the top of Section 3
+ */
+function importFromSelector(gbId, modelName, autoMode){
+  /* ── Resolve what to import ── */
+  var targetGbId=gbId, targetModel=modelName;
+
+  // Priority 1: explicit pending import (from → Interface button)
+  if(!targetGbId && window._pendingCompatImport){
+    targetGbId=window._pendingCompatImport.gbId;
+    targetModel=window._pendingCompatImport.modelName;
+    window._pendingCompatImport=null;
+  }
+
+  // Priority 2 (auto mode only): best match from lastRes
+  if(!targetGbId && autoMode && lastRes && lastRes.length>0){
+    var best=lastRes[0];
+    targetGbId=best.gb.id;
+    // Use first qualifying model if available, else first model
+    var fm=best.mm&&best.mm.length>0 ? best.mm[0] : (best.gb.models&&best.gb.models[0]||null);
+    targetModel=fm?fm.m:null;
+  }
+
+  // Nothing to import
+  if(!targetGbId||!targetModel) return;
+
+  var gb=GB.find(function(g){return g.id===targetGbId;});
+  var model=gb?gb.models.find(function(m){return m.m===targetModel;}):null;
+  if(!gb||!model) return;
+
+  /* ── Map internal gbId → selector series key ──
+     The gbSeries dropdown uses simplified keys (AB covers AB-SG/PS/SS etc.)  */
+  var seriesKeyMap={
+    'IW':'IW','MOW':'MOW',
+    'AB-SG':'AB','AB-PS':'AB','AB-SS':'AB',
+    'ILG-S':'ILG-S','ILG-D':'ILG-D',
+    'IB':'IB','IS':'IS'
+  };
+  var seriesKey=seriesKeyMap[targetGbId]||targetGbId;
+
+  /* ── Populate gbSeries dropdown ── */
+  var seriesSel=document.getElementById('gbSeries');
+  seriesSel.value=seriesKey;
+
+  /* ── Rebuild gbModel dropdown then set value ── */
+  onGbSeriesChange(); // repopulates the model dropdown
+  var modelSel=document.getElementById('gbModel');
+  var targetVal=targetGbId+'|'+targetModel;
+  // Try to find and select the option
+  var found=false;
+  for(var i=0;i<modelSel.options.length;i++){
+    if(modelSel.options[i].value===targetVal){
+      modelSel.selectedIndex=i;
+      found=true;
+      break;
+    }
+  }
+
+  /* ── Mirror the flange selection from the selector ── */
+  var selectorFlange=document.getElementById('vflange').value;
+  if(selectorFlange&&selectorFlange!=='any'){
+    // Only mirror ISO flanges (F05–F40); IS-series flanges don't map to the compat flange dropdown
+    var isoMatch=selectorFlange.match(/^F(\d+)$/);
+    if(isoMatch&&parseInt(isoMatch[1],10)<100){
+      // Set mounting standard to ISO and flange size
+      var mstd=document.getElementById('mountStd');
+      mstd.value='iso';
+      onMountStdChange();
+      document.getElementById('flangeSize').value=selectorFlange;
+    }
+  }
+
+  /* ── Show import banner inside Section 3 ── */
+  renderImportBanner(gb, model, found);
+}
+
+/** Renders (or updates) the import confirmation banner at the top of Section 3 */
+function renderImportBanner(gb, model, modelFound){
+  // Remove any existing banner
+  var old=document.getElementById('import-banner');
+  if(old)old.remove();
+
+  var banner=document.createElement('div');
+  banner.id='import-banner';
+  banner.style.cssText='background:rgba(6,182,212,.09);border:1px solid rgba(6,182,212,.3);border-radius:6px;'
+    +'padding:10px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;';
+
+  var status=modelFound
+    ? '<span style="color:var(--teal);font-family:\'DM Mono\',monospace;font-size:11px;">'
+      +'\u2713 Imported from Gearbox Selector</span>'
+      +'<div style="font-size:12px;color:var(--text);margin-top:3px;">'
+      +'<strong>'+gb.series+'</strong> &mdash; <code style="background:rgba(255,255,255,.06);padding:1px 6px;border-radius:3px;">'+model.m+'</code>'
+      +'&nbsp;&nbsp;<span style="color:var(--muted);font-size:11px;">'+model.tNm.toLocaleString('en-US')+' Nm rated output</span>'
+      +'</div>'
+    : '<span style="color:var(--yellow);font-family:\'DM Mono\',monospace;font-size:11px;">'
+      +'\u26a0 Series imported but model not found in dropdown &mdash; please select manually.</span>';
+
+  banner.innerHTML='<div>'+status+'</div>'
+    +'<button onclick="this.parentNode.remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 2px;" title="Dismiss">\u00d7</button>';
+
+  // Insert at top of Section 3 fg div
+  var sec3=document.querySelector('#f-gb-series').closest('.fg');
+  if(sec3) sec3.insertBefore(banner, sec3.firstChild);
+}
+
+/* ════════════════════════════════════════════════════════════
+   COMPATIBILITY PAGE — UI HELPERS
+════════════════════════════════════════════════════════════ */
+
+/** Set unit system and update all unit labels */
+function setUnits(u, btn){
+  compatUnit=u;
+  document.querySelectorAll('.unit-toggle button').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  // Update all unit labels in the form
+  document.querySelectorAll('.unit-lbl').forEach(function(el){el.textContent=u;});
+  document.querySelectorAll('[id^="lbl-"][id$="-unit"]').forEach(function(el){el.textContent=u;});
+}
+
+/** Show/hide conditional form sections */
+function onMountStdChange(){
+  var v=document.getElementById('mountStd').value;
+  document.getElementById('cond-iso').classList.toggle('show', v==='iso');
+  document.getElementById('cond-custom-flange').classList.toggle('show', v==='mss'||v==='custom');
+}
+function onStemShapeChange(){
+  ['square','dd','keyed','round','splined'].forEach(function(s){
+    document.getElementById('cond-'+s).classList.remove('show');
+  });
+  var v=document.getElementById('stemShape').value;
+  if(v) document.getElementById('cond-'+v).classList.add('show');
+}
+function onGbSeriesChange(){
+  var seriesId=document.getElementById('gbSeries').value;
+  var sel=document.getElementById('gbModel');
+  sel.innerHTML='<option value="">-- Select model --</option>';
+  if(!seriesId)return;
+  // Map selector id → GB id(s) — AB covers all three AB variants
+  var ids={'IW':['IW'],'MOW':['MOW'],'AB':['AB-SG','AB-PS','AB-SS'],'ILG-S':['ILG-S'],'ILG-D':['ILG-D'],'IB':['IB'],'IS':['IS']};
+  var gbIds=ids[seriesId]||[];
+  gbIds.forEach(function(gid){
+    var gb=GB.find(function(g){return g.id===gid;});
+    if(!gb)return;
+    if(gbIds.length>1){
+      var og=document.createElement('optgroup');
+      og.label=gb.series;
+      gb.models.forEach(function(m){
+        var o=document.createElement('option');
+        o.value=gid+'|'+m.m; o.textContent=m.m;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    } else {
+      gb.models.forEach(function(m){
+        var o=document.createElement('option');
+        o.value=gid+'|'+m.m; o.textContent=m.m;
+        sel.appendChild(o);
+      });
+    }
+  });
+  // Show sleeve state field
+  document.getElementById('f-sleeve-state').style.display='';
+}
+function showPreMach(){
+  var v=document.getElementById('sleeveState').value;
+  document.getElementById('cond-premach').classList.toggle('show', v==='machined-std');
+}
+
+/** Clear validation errors */
+function clearErrors(){
+  document.querySelectorAll('.f.has-err').forEach(function(f){f.classList.remove('has-err');});
+}
+/** Mark a field as error */
+function markErr(id){
+  var el=document.getElementById(id);
+  if(el) el.closest('.f').classList.add('has-err');
+}
+
+/** Get numeric value, convert to mm if needed */
+function getNum(id){
+  var v=parseFloat(document.getElementById(id).value);
+  if(isNaN(v)||v<=0)return null;
+  return compatUnit==='in'? v*25.4 : v; // always store as mm internally
+}
+function fmtDim(mm){
+  if(compatUnit==='in') return (mm/25.4).toFixed(4)+'"';
+  return mm.toFixed(2)+' mm';
+}
+function fmtU(){return compatUnit==='in'?'"':' mm';}
+
+/* ════════════════════════════════════════════════════════════
+   COMPATIBILITY ENGINE
+   Rules applied (in order):
+   1. Required fields present?             → INSUFFICIENT DATA
+   2. Flange match: does gearbox output flange contain valve flange?
+   3. Bore check: valve stem inscribed circle ≤ gearbox max bore
+   4. Square A/F check (if square stem):  A/F ≤ gearbox max square bore
+   5. Stem height check (if data available): height ≤ max sleeve depth
+   6. Sleeve state → machining or verify callout
+════════════════════════════════════════════════════════════ */
+function runCompat(){
+  clearErrors();
+  var missing=[];
+  var warnings=[];
+  var oks=[];
+
+  /* ─ Gather inputs ─ */
+  var mountStd=document.getElementById('mountStd').value;
+  var stemShape=document.getElementById('stemShape').value;
+  var sleeveState=document.getElementById('sleeveState').value;
+  var gbModelRaw=document.getElementById('gbModel').value; // "gbId|modelName"
+  var gbSeriesId=document.getElementById('gbSeries').value;
+  var extraNotes=document.getElementById('extraNotes').value.trim();
+
+  /* ─ Required field validation ─ */
+  if(!mountStd){missing.push('Mounting Standard');markErr('f-mount-std');}
+  if(!stemShape){missing.push('Stem Profile / Drive Type');markErr('f-stem-shape');}
+  if(!gbSeriesId){missing.push('Gearbox Series');markErr('f-gb-series');}
+  if(!gbModelRaw||gbModelRaw===''){missing.push('Gearbox Model');markErr('f-gb-model');}
+  if(!sleeveState){missing.push('Output Drive Sleeve State');markErr('f-sleeve-state');}
+
+  // Flange-specific required fields
+  var flangeSize='';
+  if(mountStd==='iso'){
+    flangeSize=document.getElementById('flangeSize').value;
+    if(!flangeSize){missing.push('ISO Flange Size');markErr('f-flange-size');}
+  }
+
+  // Stem-specific required fields
+  var stemData={};
+  if(stemShape==='square'){
+    stemData.af=getNum('sqAF');stemData.height=getNum('sqHeight');
+    if(!stemData.af){missing.push('Square stem: Across Flats (A/F)');markErr('f-sq-af');}
+  } else if(stemShape==='dd'){
+    stemData.dia=getNum('ddDia');stemData.depth=getNum('ddDepth');stemData.height=getNum('ddHeight');
+    if(!stemData.dia){missing.push('DD stem: Shaft Diameter');markErr('f-dd-dia');}
+    if(!stemData.depth){missing.push('DD stem: Depth (d)');markErr('f-dd-depth');}
+  } else if(stemShape==='keyed'){
+    stemData.dia=getNum('kDia');stemData.kw=getNum('kW');stemData.kd=getNum('kD');
+    stemData.height=getNum('kHeight');stemData.nkeys=document.getElementById('nKeys').value;
+    if(!stemData.dia){missing.push('Keyed stem: Stem Diameter');markErr('f-k-dia');}
+    if(!stemData.kw){missing.push('Keyed stem: Key Width');markErr('f-kw');}
+    if(!stemData.kd){missing.push('Keyed stem: Key Depth');markErr('f-kd');}
+  } else if(stemShape==='round'){
+    stemData.dia=getNum('rDia');stemData.height=getNum('rHeight');
+    if(!stemData.dia){missing.push('Round stem: Stem Diameter');markErr('f-r-dia');}
+  }
+
+  /* ─ Return INSUFFICIENT DATA if anything missing ─ */
+  if(missing.length>0){
+    renderCompatResult('insufficient',null,missing,[],[],null,null);
+    return;
+  }
+
+  /* ─ Look up gearbox model ─ */
+  var parts=gbModelRaw.split('|');
+  var gbId=parts[0], modelName=parts[1];
+  var gb=GB.find(function(g){return g.id===gbId;});
+  var model=gb?gb.models.find(function(m){return m.m===modelName;}):null;
+  if(!gb||!model){
+    renderCompatResult('insufficient',null,['Could not locate gearbox model data'],[],[],null,null);
+    return;
+  }
+
+  /* ─ RULE 1: Flange match ─
+     The gearbox output flanges are FA-series (ISO with pilot).
+     A valve with F14 is compatible with an FA14 output and vice versa.
+     We normalize both to numeric key and compare.
+  */
+  var flangeOkResult=true, flangeNote='';
+  if(mountStd==='iso'&&flangeSize){
+    var reqKey=flangeSize.replace(/^F/,'').replace(/^A/,''); // e.g. "14"
+    var gbMatch=gb.outFlanges.some(function(f){
+      var k=f.replace(/^FA/,'').replace(/^F/,'');
+      return k===reqKey;
+    });
+    if(gbMatch){
+      var isoInfo=FLANGE_ISO.find(function(f){return f.t==='F'+reqKey;});
+      oks.push('Flange match: '+flangeSize+' compatible with '+gb.series+' output ('+gb.outFlanges.filter(function(f){return f.replace(/^FA/,'').replace(/^F/,'')===reqKey;}).join(', ')+')');
+      if(isoInfo) oks.push('ISO flange PCD: '+isoInfo.pcd+' mm, '+isoInfo.n+'× '+isoInfo.bolt+' bolts');
+    } else {
+      flangeOkResult=false;
+      flangeNote='Flange MISMATCH: Valve requires '+flangeSize+', but '+gb.series+' offers: '+gb.outFlanges.join(', ')+'. Consider a different gearbox size or adapter plate.';
+    }
+  } else if(mountStd==='mss'||mountStd==='custom'){
+    var bcd=getNum('bcd');
+    if(bcd) warnings.push('Custom/MSS flange with BCD '+fmtDim(bcd)+' — verify against gearbox output flange drawing. No automatic check available for non-ISO flanges.');
+    else    warnings.push('Custom/MSS flange selected but BCD not entered — flange compatibility cannot be evaluated.');
+  }
+
+  /* ─ RULE 2: Bore check ─ */
+  var boreOk=true, boreNote='';
+  var effectiveDia=0; // the stem's inscribed circle diameter in mm
+  if(stemShape==='square'&&stemData.af){
+    // For a square, inscribed circle dia = A/F (not diagonal). Correct.
+    effectiveDia=stemData.af;
+  } else if(stemShape==='dd'&&stemData.dia){
+    effectiveDia=stemData.dia;
+  } else if(stemShape==='keyed'&&stemData.dia){
+    effectiveDia=stemData.dia;
+  } else if(stemShape==='round'&&stemData.dia){
+    effectiveDia=stemData.dia;
+  }
+
+  if(effectiveDia>0&&model.maxBoreMm){
+    if(effectiveDia<=model.maxBoreMm){
+      oks.push('Bore check: Stem drive dimension '+fmtDim(effectiveDia)+' \u2264 max sleeve bore '+fmtDim(model.maxBoreMm)+' (\u2713 PASS)');
+    } else {
+      boreOk=false;
+      boreNote='Bore FAIL: Stem drive dimension '+fmtDim(effectiveDia)+' EXCEEDS max sleeve bore of '+fmtDim(model.maxBoreMm)+' for '+modelName+'. Select a larger gearbox model.';
+    }
+  } else if(effectiveDia>0&&!model.maxBoreMm){
+    warnings.push('Max bore for '+modelName+' not in database — bore compatibility must be verified against Rotork drawing.');
+  }
+
+  /* ─ RULE 3: Square A/F check ─ */
+  if(stemShape==='square'&&stemData.af&&model.maxSqAFMm){
+    if(stemData.af<=model.maxSqAFMm){
+      oks.push('Square bore A/F check: '+fmtDim(stemData.af)+' \u2264 max '+fmtDim(model.maxSqAFMm)+' (\u2713 PASS)');
+    } else {
+      boreOk=false;
+      boreNote=(boreNote?boreNote+'\n':'')+'Square A/F '+fmtDim(stemData.af)+' EXCEEDS max square bore '+fmtDim(model.maxSqAFMm)+' for '+modelName+'.';
+    }
+  }
+
+  /* ─ RULE 4: Stem height check ─ */
+  var stemHok=true, stemHnote='';
+  var stemHmm=stemData.height||null;
+  var maxH=model.maxStemHMm||(model.stemH||null);
+  if(stemHmm&&maxH){
+    if(stemHmm<=maxH){
+      oks.push('Stem height check: '+fmtDim(stemHmm)+' \u2264 max sleeve depth '+fmtDim(maxH)+' (\u2713 PASS)');
+    } else {
+      stemHok=false;
+      stemHnote='Stem height '+fmtDim(stemHmm)+' EXCEEDS max sleeve depth '+fmtDim(maxH)+' for '+modelName+'. An extended stem adapter or alternative model required.';
+    }
+  } else if(stemHmm&&!maxH){
+    warnings.push('Max sleeve depth for '+modelName+' not in database — stem height must be verified against Rotork drawing.');
+  } else if(!stemHmm){
+    warnings.push('Stem height above mounting face not provided — sleeve depth compatibility not checked.');
+  }
+
+  /* ─ RULE 5: Drive profile support ─ */
+  var driveOk=true, driveNote='';
+  if(stemShape==='splined'){
+    driveOk=false;
+    driveNote='Splined drive requires custom sleeve machining. Consult Rotork engineering with spline spec: '+(document.getElementById('splineSpec').value||'(not specified)')+'.';
+  } else if(model.driveOptions&&model.driveOptions.indexOf(stemShape)<0){
+    driveOk=false;
+    driveNote='Drive type "'+stemShape+'" not listed as standard for '+modelName+'. Consult Rotork.';
+  } else {
+    oks.push('Drive profile "'+stemShape+'" is standard for '+gb.series);
+  }
+
+  /* ─ Determine overall verdict ─ */
+  var hardFails=[];
+  if(!flangeOkResult)hardFails.push(flangeNote);
+  if(!boreOk)hardFails.push(boreNote);
+  if(!stemHok)hardFails.push(stemHnote);
+  if(!driveOk)hardFails.push(driveNote);
+
+  var verdict=hardFails.length>0?'bad':(warnings.length>0?'warn':'ok');
+
+  /* ─ Build machining callout ─ */
+  var machLines=buildMachiningCallout(gb,model,stemShape,stemData,sleeveState,flangeSize,mountStd,extraNotes);
+
+  renderCompatResult(verdict,{gb:gb,model:model,modelName:modelName},missing,hardFails,warnings,oks,machLines);
+}
+
+/* ════════════════════════════════════════════════════════════
+   MACHINING CALLOUT BUILDER
+   Generates a text block suitable for inclusion in a PO/RFQ.
+   Rules:
+   - Blank sleeve → full machining spec required
+   - Pre-machined std → verification note
+   - Pre-machined custom → verify + tolerances note
+════════════════════════════════════════════════════════════ */
+function buildMachiningCallout(gb, model, stemShape, stemData, sleeveState, flangeSize, mountStd, extraNotes){
+  var u=compatUnit==='in'?'"':' mm';
+  var lines=[];
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+
+  lines.push('ROTORK GEARBOX — OUTPUT SLEEVE MACHINING REQUIREMENTS');
+  lines.push('Generated: '+dateStr);
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  lines.push('Gearbox Series : '+gb.series);
+  lines.push('Gearbox Model  : '+model.m);
+  lines.push('Max Rated Torque: '+model.tNm.toLocaleString('en-US')+' Nm');
+  if(mountStd==='iso'&&flangeSize) lines.push('Valve Interface : ISO 5211 '+flangeSize);
+  else if(mountStd==='mss') lines.push('Valve Interface : MSS SP-101 (AWWA)');
+  else lines.push('Valve Interface : Custom');
+  lines.push('Stem Profile   : '+{square:'Square',dd:'Double-D (DD)',keyed:'Round with Keyway',round:'Plain Round',splined:'Splined'}[stemShape]);
+  lines.push('Sleeve State   : '+({blank:'Blank — machining required',
+                                    'machined-std':'Pre-machined standard',
+                                    'machined-custom':'Pre-machined custom'}[sleeveState]||sleeveState));
+  lines.push('');
+
+  if(sleeveState==='blank'){
+    lines.push('MACHINING INSTRUCTIONS (BLANK SLEEVE):');
+    lines.push('');
+
+    if(stemShape==='square'&&stemData.af){
+      lines.push('  1. BORE:');
+      lines.push('     Machine bore to inscribed circle: \u00d8'+fmtDim(stemData.af));
+      lines.push('     Tolerance: H7 recommended (e.g., +0.000 / +0.021 for \u00d830)');
+      lines.push('');
+      lines.push('  2. SQUARE BORE:');
+      lines.push('     Machine square across flats to: '+fmtDim(stemData.af)+' A/F');
+      lines.push('     Tolerance: \u00b10.1'+u+' on flats, H7 corner radii');
+      if(stemData.height) lines.push('     Bore depth: '+fmtDim(stemData.height)+' (stem height above flange face)');
+      lines.push('');
+      lines.push('  3. VERIFICATION:');
+      lines.push('     Confirm square bore does not exceed max sleeve bore of '+(model.maxBoreMm?fmtDim(model.maxBoreMm):'(see drawing)')+' for '+model.m);
+
+    } else if(stemShape==='dd'&&stemData.dia){
+      lines.push('  1. BORE:');
+      lines.push('     Machine bore to: \u00d8'+fmtDim(stemData.dia));
+      lines.push('     Tolerance: H7');
+      lines.push('');
+      lines.push('  2. DOUBLE-D FLATS:');
+      lines.push('     Machine DD flats to coupling spec (DD'+Math.round(stemData.dia)+')');
+      lines.push('     Flat depth (d): '+fmtDim(stemData.depth));
+      lines.push('     Tolerance: \u00b10.05'+u+' on flat depth');
+      if(stemData.height) lines.push('     Drive depth: '+fmtDim(stemData.height));
+
+    } else if(stemShape==='keyed'&&stemData.dia){
+      lines.push('  1. BORE:');
+      lines.push('     Machine bore to: \u00d8'+fmtDim(stemData.dia));
+      lines.push('     Tolerance: H7');
+      lines.push('');
+      lines.push('  2. KEYWAY:');
+      lines.push('     Width (W): '+fmtDim(stemData.kw));
+      lines.push('     Depth (D): '+fmtDim(stemData.kd)+' (from bore surface)');
+      lines.push('     No. of keys: '+(stemData.nkeys||'1'));
+      lines.push('     Tolerance to ANSI B17.1 / ISO 773');
+      lines.push('     Keyway tolerance: JS9 / P9 as applicable');
+      if(stemData.height) lines.push('     Bore depth: '+fmtDim(stemData.height));
+
+    } else if(stemShape==='round'&&stemData.dia){
+      lines.push('  1. BORE:');
+      lines.push('     Machine bore to: \u00d8'+fmtDim(stemData.dia));
+      lines.push('     Tolerance: H7');
+      lines.push('     NOTE: Plain round — specify drive method (pin, set-screw, friction clamp).');
+      lines.push('     Confirm with Rotork engineering before machining.');
+      if(stemData.height) lines.push('     Bore depth: '+fmtDim(stemData.height));
+
+    } else if(stemShape==='splined'){
+      lines.push('  CUSTOM MACHINING — SPLINED DRIVE:');
+      lines.push('     Spline spec: '+(document.getElementById('splineSpec').value||'NOT SPECIFIED'));
+      lines.push('     Contact Rotork Gears engineering for custom sleeve drawing.');
+      lines.push('     DO NOT machine without Rotork-approved drawing.');
+    }
+
+  } else if(sleeveState==='machined-std'){
+    lines.push('VERIFICATION REQUIRED (PRE-MACHINED STANDARD):');
+    lines.push('');
+    lines.push('  Confirm pre-machined dimensions match valve stem:');
+    if(stemShape==='square'&&stemData.af) lines.push('  \u2022 Square A/F: '+fmtDim(stemData.af));
+    if(stemShape==='dd'&&stemData.dia)    lines.push('  \u2022 DD bore: \u00d8'+fmtDim(stemData.dia)+', flat depth: '+fmtDim(stemData.depth||0));
+    if(stemShape==='keyed'&&stemData.dia) lines.push('  \u2022 Keyed bore: \u00d8'+fmtDim(stemData.dia)+', key: '+fmtDim(stemData.kw||0)+' \u00d7 '+fmtDim(stemData.kd||0));
+    if(stemShape==='round'&&stemData.dia) lines.push('  \u2022 Round bore: \u00d8'+fmtDim(stemData.dia));
+    lines.push('  \u2022 Stem height: '+(stemData.height?fmtDim(stemData.height):'not specified'));
+    lines.push('  Verify against Rotork sleeve drawing before assembly.');
+
+  } else if(sleeveState==='machined-custom'){
+    lines.push('VERIFICATION REQUIRED (PRE-MACHINED CUSTOM):');
+    lines.push('');
+    lines.push('  Custom machined sleeve supplied — verify:');
+    lines.push('  \u2022 All dimensions against valve stem measurements');
+    lines.push('  \u2022 Tolerances per ANSI B17.1 / ISO 773 as applicable');
+    lines.push('  \u2022 Bore depth accommodates stem height');
+    lines.push('  Obtain Rotork inspection report or DXF before assembly.');
+  }
+
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  if(extraNotes) lines.push('Additional Notes: '+extraNotes);
+  lines.push('IMPORTANT: These machining notes are generated from user-entered dimensions.');
+  lines.push('Always verify against current Rotork dimensional drawings before machining.');
+
+  return lines.join('\n');
+}
+
+/* ════════════════════════════════════════════════════════════
+   RENDER COMPATIBILITY RESULT
+════════════════════════════════════════════════════════════ */
+function renderCompatResult(verdict, gbData, missing, hardFails, warnings, oks, machLines){
+  var el=document.getElementById('compatResult');
+
+  if(verdict==='insufficient'){
+    var mhtml='<div class="missing-list">'+missing.map(function(m){return'<div class="missing-item">\u26a0 '+m+'</div>';}).join('')+'</div>';
+    el.innerHTML='<div class="result-panel info">'
+      +'<div class="result-verdict"><span class="verdict-icon">\uD83D\uDCCB</span><span class="verdict-title info">Insufficient Data</span></div>'
+      +'<div style="font-size:13px;color:var(--dim);margin-bottom:8px;">The following required fields are missing or incomplete:</div>'
+      +mhtml+'</div>';
+    return;
+  }
+
+  /* Build items list */
+  var itemsHtml='<div class="result-items">';
+
+  // Hard fails
+  hardFails.forEach(function(f){
+    itemsHtml+='<div class="ri bad-item"><div class="dot"></div><div><div class="ri-text">'+f+'</div></div></div>';
+  });
+  // Warnings
+  warnings.forEach(function(w){
+    itemsHtml+='<div class="ri warn-item"><div class="dot"></div><div><div class="ri-text">'+w+'</div></div></div>';
+  });
+  // OKs
+  if(oks&&oks.length){
+    oks.forEach(function(o){
+      itemsHtml+='<div class="ri ok-item"><div class="dot"></div><div><div class="ri-text">'+o+'</div></div></div>';
+    });
+  }
+  itemsHtml+='</div>';
+
+  var icons={ok:'\u2705',warn:'\u26A0\uFE0F',bad:'\u274C'};
+  var titles={ok:'Compatible',warn:'Compatible — With Warnings',bad:'Not Compatible'};
+
+  var machHtml='';
+  if(machLines){
+    machHtml='<div class="machine-block">'
+      +'<div class="machine-block-title">Machining Requirements / RFQ Notes</div>'
+      +'<div class="machine-note" id="machNote">'+escHtml(machLines)+'</div>'
+      +'<div class="machine-actions">'
+      +'<button class="btn-copy" onclick="copyMach(this)">&#128203; Copy Machining Notes</button>'
+      +'<span style="font-size:11px;color:var(--muted);font-style:italic;">Paste into RFQ, PO notes, or work order</span>'
+      +'</div></div>';
+  }
+
+  el.innerHTML='<div class="result-panel '+verdict+'">'
+    +'<div class="result-verdict"><span class="verdict-icon">'+icons[verdict]+'</span><span class="verdict-title '+verdict+'">'+titles[verdict]+'</span></div>'
+    +(gbData?'<div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-family:\'DM Mono\',monospace;">'+gbData.gb.series+' \u2014 '+gbData.modelName+'</div>':'')
+    +itemsHtml
+    +machHtml
+    +'</div>';
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function copyMach(btn){
+  var el=document.getElementById('machNote');
+  if(!el)return;
+  navigator.clipboard.writeText(el.textContent).then(function(){
+    btn.textContent='\u2713 Copied!';
+    btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='\uD83D\uDCCB Copy Machining Notes';btn.classList.remove('copied');},2500);
+  }).catch(function(){
+    /* Fallback for non-HTTPS contexts */
+    var ta=document.createElement('textarea');
+    ta.value=el.textContent;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='\u2713 Copied!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='\uD83D\uDCCB Copy Machining Notes';btn.classList.remove('copied');},2500);
+  });
+}
+
+/* ── DOM READY ── */
 document.addEventListener('DOMContentLoaded',function(){
+  /* Track user interaction with "To unit" selector so auto-follow doesn't override */
   var ts=document.getElementById('tct');
   if(ts)ts.addEventListener('change',function(){ts.dataset.us='1';});
+  /* Wire sleeve state change */
+  var ss=document.getElementById('sleeveState');
+  if(ss)ss.addEventListener('change',showPreMach);
 });
 </script>
 </body>
